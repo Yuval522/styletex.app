@@ -248,11 +248,55 @@ async function main() {
     },
   });
 
+  await prisma.calendarEvent.createMany({
+    data: [
+      {
+        projectId: chenProject.id,
+        title: "מדידת שטח — דירת כהן",
+        type: "MEASUREMENT",
+        startAt: new Date("2026-09-10"),
+        allDay: true,
+        notes: "להביא סרט מדידה לייזר ולתעד את קווי החשמל הקיימים.",
+      },
+      {
+        projectId: wentworthProject.id,
+        title: "פגישת עיצוב עם משפחת ונטוורת'",
+        type: "CLIENT_MEETING",
+        startAt: new Date("2026-09-15"),
+        allDay: true,
+        notes: "אישור סופי לבחירת גימורים ואבזור.",
+      },
+      {
+        projectId: milesProject.id,
+        title: "תחילת ייצור — מטבח מיילס",
+        type: "MANUFACTURING_START",
+        startAt: new Date("2026-09-08"),
+        allDay: true,
+      },
+      {
+        projectId: milesProject.id,
+        title: "אספקת חומרי גלם למחסן",
+        type: "DELIVERY",
+        startAt: new Date("2026-10-05"),
+        allDay: true,
+      },
+      {
+        projectId: milesProject.id,
+        title: "התקנה — מטבח מיילס",
+        type: "INSTALLATION",
+        startAt: new Date("2026-11-12"),
+        allDay: true,
+        notes: "לתאם צוות התקנה של שני אנשים, יום עבודה מלא.",
+      },
+    ],
+  });
+
   console.log("Seed complete:", {
     suppliers: 2,
     materials: [whiteOak, walnut, quartz, brassPulls].length,
     clients: 3,
     projects: [milesProject, chenProject, wentworthProject, leadProject].length,
+    calendarEvents: 5,
   });
 }
 

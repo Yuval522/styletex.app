@@ -46,10 +46,11 @@ model Project {
   startDate  DateTime?
   targetDate DateTime?
 
-  rooms      Room[]
-  quotes     Quote[]
-  workOrders WorkOrder[]
-  files      FileAsset[]
+  rooms          Room[]
+  quotes         Quote[]
+  workOrders     WorkOrder[]
+  files          FileAsset[]
+  calendarEvents CalendarEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -209,6 +210,35 @@ model FileAsset {
   uploadedAt DateTime @default(now())
 
   @@index([projectId])
+}
+
+// ---------- Calendar ----------
+
+enum CalendarEventType {
+  MEASUREMENT
+  CLIENT_MEETING
+  MANUFACTURING_START
+  DELIVERY
+  INSTALLATION
+  OTHER
+}
+
+model CalendarEvent {
+  id        String            @id @default(cuid())
+  project   Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String?
+  title     String
+  type      CalendarEventType @default(OTHER)
+  startAt   DateTime
+  endAt     DateTime?
+  allDay    Boolean           @default(true)
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([startAt])
 }
 
 // ---------- Users ----------
