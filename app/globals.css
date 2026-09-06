@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  /* Warm neutral base */
+  --background: #FAF8F5;
+  --surface: #FFFFFF;
+  --surface-muted: #F1EEE8;
+  --foreground: #1C1B1A;
+  --muted: #8A8579;
+  --muted-foreground: #6B665C;
+  --border: #E4DFD5;
+
+  /* Accent: warm brass/walnut */
+  --accent: #A9793F;
+  --accent-foreground: #FFFFFF;
+  --accent-soft: #F1E4D2;
+
+  /* Status colors (muted, not saturated) */
+  --status-lead: #8A8579;
+  --status-design: #6E85A0;
+  --status-quoted: #B08D57;
+  --status-approved: #6B8F71;
+  --status-production: #A9793F;
+  --status-installation: #7A6BA0;
+  --status-complete: #4C7A5A;
+  --status-cancelled: #B15C4D;
+
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-status-lead: var(--status-lead);
+  --color-status-design: var(--status-design);
+  --color-status-quoted: var(--status-quoted);
+  --color-status-approved: var(--status-approved);
+  --color-status-production: var(--status-production);
+  --color-status-installation: var(--status-installation);
+  --color-status-complete: var(--status-complete);
+  --color-status-cancelled: var(--status-cancelled);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}
+
+/* subtle scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
