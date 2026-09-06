@@ -50,8 +50,9 @@
   --color-status-complete: var(--status-complete);
   --color-status-cancelled: var(--status-cancelled);
 
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-inter);
+  --font-display: var(--font-rubik);
+  --font-sans: var(--font-rubik);
+  --font-brand: var(--font-fraunces);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -66,6 +67,10 @@ body {
 
 .font-display {
   font-family: var(--font-display), Georgia, serif;
+}
+
+.font-brand {
+  font-family: var(--font-brand), Georgia, serif;
 }
 
 ::selection {

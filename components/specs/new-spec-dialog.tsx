@@ -39,46 +39,46 @@ export function NewSpecDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
-          <Plus /> Add spec
+          <Plus /> הוסף מפרט
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add cabinet spec</DialogTitle>
+          <DialogTitle>הוספת מפרט ארון</DialogTitle>
         </DialogHeader>
         <form action={action} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="doorStyle">Door style</Label>
-              <Input id="doorStyle" name="doorStyle" required placeholder="Shaker" />
+              <Label htmlFor="doorStyle">סגנון דלת</Label>
+              <Input id="doorStyle" name="doorStyle" required placeholder="קלאסי" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="finish">Finish</Label>
-              <Input id="finish" name="finish" required placeholder="Matte white" />
+              <Label htmlFor="finish">גימור</Label>
+              <Input id="finish" name="finish" required placeholder="לבן מאט" />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="width">Width (in)</Label>
+              <Label htmlFor="width">רוחב (אינץ&apos;)</Label>
               <Input id="width" name="width" type="number" step="0.1" required />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="height">Height (in)</Label>
+              <Label htmlFor="height">גובה (אינץ&apos;)</Label>
               <Input id="height" name="height" type="number" step="0.1" required />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="depth">Depth (in)</Label>
+              <Label htmlFor="depth">עומק (אינץ&apos;)</Label>
               <Input id="depth" name="depth" type="number" step="0.1" required />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Material</Label>
+            <Label>חומר</Label>
             <input type="hidden" name="materialId" value={materialId} />
             <Select value={materialId} onValueChange={setMaterialId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a material (optional)" />
+                <SelectValue placeholder="בחר חומר (לא חובה)" />
               </SelectTrigger>
               <SelectContent>
                 {materials.map((m) => (
@@ -91,18 +91,18 @@ export function NewSpecDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="hardware">Hardware</Label>
-            <Input id="hardware" name="hardware" placeholder="Brushed brass pulls" />
+            <Label htmlFor="hardware">אביזרים</Label>
+            <Input id="hardware" name="hardware" placeholder="ידיות פליז מוברש" />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea id="notes" name="notes" placeholder="Soft-close hinges, custom inset…" />
+            <Label htmlFor="notes">הערות</Label>
+            <Textarea id="notes" name="notes" placeholder="צירי סופט-קלוז, מסגרת מותאמת אישית…" />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              Add spec
+              הוסף מפרט
             </Button>
           </div>
         </form>

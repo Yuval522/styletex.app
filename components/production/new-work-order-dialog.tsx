@@ -23,29 +23,29 @@ export function NewWorkOrderDialog({ projectId }: { projectId: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="accent" size="sm">
-          <Plus /> New work order
+          <Plus /> הזמנת עבודה חדשה
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New work order</DialogTitle>
+          <DialogTitle>הזמנת עבודה חדשה</DialogTitle>
         </DialogHeader>
         <form action={action} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="assignedTo">Assigned to</Label>
-            <Input id="assignedTo" name="assignedTo" placeholder="Shop floor lead" />
+            <Label htmlFor="assignedTo">שויך ל</Label>
+            <Input id="assignedTo" name="assignedTo" placeholder="אחראי רצפת הייצור" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="dueDate">Due date</Label>
+            <Label htmlFor="dueDate">תאריך יעד</Label>
             <Input id="dueDate" name="dueDate" type="date" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea id="notes" name="notes" placeholder="Cut list, special instructions…" />
+            <Label htmlFor="notes">הערות</Label>
+            <Textarea id="notes" name="notes" placeholder="רשימת חיתוך, הוראות מיוחדות…" />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              Create work order
+              צור הזמנת עבודה
             </Button>
           </div>
         </form>

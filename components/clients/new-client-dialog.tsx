@@ -22,39 +22,39 @@ export function NewClientDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="accent">
-          <Plus /> New client
+          <Plus /> לקוח חדש
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New client</DialogTitle>
+          <DialogTitle>לקוח חדש</DialogTitle>
         </DialogHeader>
         <form action={createClient} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" required placeholder="Jordan Miles" />
+            <Label htmlFor="name">שם</Label>
+            <Input id="name" name="name" required placeholder="ישראל ישראלי" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="jordan@email.com" />
+              <Label htmlFor="email">אימייל</Label>
+              <Input id="email" name="email" type="email" placeholder="israel@email.com" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" name="phone" placeholder="(555) 010-2938" />
+              <Label htmlFor="phone">טלפון</Label>
+              <Input id="phone" name="phone" placeholder="050-1234567" />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="address">Address</Label>
-            <Input id="address" name="address" placeholder="123 Birchwood Ln" />
+            <Label htmlFor="address">כתובת</Label>
+            <Input id="address" name="address" placeholder="רחוב הרצל 12, תל אביב" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea id="notes" name="notes" placeholder="Referral source, preferences…" />
+            <Label htmlFor="notes">הערות</Label>
+            <Textarea id="notes" name="notes" placeholder="מקור ההפניה, העדפות…" />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              Create client
+              צור לקוח
             </Button>
           </div>
         </form>

@@ -21,7 +21,14 @@ import {
 } from "@/components/ui/select";
 import { createMaterial } from "@/actions/materials";
 
-const TYPES = ["WOOD", "LAMINATE", "COUNTERTOP", "HARDWARE", "FINISH", "OTHER"];
+const TYPES = [
+  { value: "WOOD", label: "עץ" },
+  { value: "LAMINATE", label: "למינציה" },
+  { value: "COUNTERTOP", label: "משטח עבודה" },
+  { value: "HARDWARE", label: "אביזרים" },
+  { value: "FINISH", label: "גימור" },
+  { value: "OTHER", label: "אחר" },
+];
 
 export function NewMaterialDialog({
   suppliers,
@@ -36,22 +43,22 @@ export function NewMaterialDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="accent" size="sm">
-          <Plus /> New material
+          <Plus /> חומר חדש
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New material</DialogTitle>
+          <DialogTitle>חומר חדש</DialogTitle>
         </DialogHeader>
         <form action={createMaterial} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" required placeholder="White oak veneer" />
+            <Label htmlFor="name">שם</Label>
+            <Input id="name" name="name" required placeholder="פורניר אלון לבן" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Type</Label>
+              <Label>סוג</Label>
               <input type="hidden" name="type" value={type} />
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger>
@@ -59,36 +66,36 @@ export function NewMaterialDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {TYPES.map((t) => (
-                    <SelectItem key={t} value={t} className="capitalize">
-                      {t.toLowerCase()}
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="unit">Unit</Label>
-              <Input id="unit" name="unit" required placeholder="sq ft" />
+              <Label htmlFor="unit">יחידת מידה</Label>
+              <Input id="unit" name="unit" required placeholder="מ&quot;ר" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="unitCost">Unit cost</Label>
+              <Label htmlFor="unitCost">עלות ליחידה</Label>
               <Input id="unitCost" name="unitCost" type="number" step="0.01" required />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="stockQty">Stock qty</Label>
+              <Label htmlFor="stockQty">כמות במלאי</Label>
               <Input id="stockQty" name="stockQty" type="number" step="0.1" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Supplier</Label>
+            <Label>ספק</Label>
             <input type="hidden" name="supplierId" value={supplierId} />
             <Select value={supplierId} onValueChange={setSupplierId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a supplier (optional)" />
+                <SelectValue placeholder="בחר ספק (לא חובה)" />
               </SelectTrigger>
               <SelectContent>
                 {suppliers.map((s) => (
@@ -102,7 +109,7 @@ export function NewMaterialDialog({
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              Add material
+              הוסף חומר
             </Button>
           </div>
         </form>

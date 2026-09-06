@@ -9,13 +9,13 @@ import type { ProjectStatus } from "@prisma/client";
 export const dynamic = "force-dynamic";
 
 const COLUMNS: { status: ProjectStatus; label: string }[] = [
-  { status: "LEAD", label: "Lead" },
-  { status: "DESIGN", label: "Design" },
-  { status: "QUOTED", label: "Quoted" },
-  { status: "APPROVED", label: "Approved" },
-  { status: "PRODUCTION", label: "Production" },
-  { status: "INSTALLATION", label: "Installation" },
-  { status: "COMPLETE", label: "Complete" },
+  { status: "LEAD", label: "ליד" },
+  { status: "DESIGN", label: "תכנון" },
+  { status: "QUOTED", label: "הצעת מחיר" },
+  { status: "APPROVED", label: "אושר" },
+  { status: "PRODUCTION", label: "בייצור" },
+  { status: "INSTALLATION", label: "התקנה" },
+  { status: "COMPLETE", label: "הושלם" },
 ];
 
 export default async function ProjectsPage() {
@@ -30,14 +30,14 @@ export default async function ProjectsPage() {
   return (
     <div>
       <PageHeader
-        title="Projects"
-        description="Pipeline across every active engagement."
+        title="פרויקטים"
+        description="צבר העבודות של כל ההתקשרויות הפעילות."
         action={<NewProjectDialog clients={clients} />}
       />
 
       {clients.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Add a client before creating your first project.
+          הוסיפו לקוח לפני יצירת הפרויקט הראשון.
         </p>
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-4">
@@ -76,7 +76,7 @@ export default async function ProjectsPage() {
                   ))}
                   {items.length === 0 && (
                     <p className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
-                      Empty
+                      ריק
                     </p>
                   )}
                 </div>

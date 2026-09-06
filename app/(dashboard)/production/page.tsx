@@ -9,11 +9,11 @@ import type { ProductionStage } from "@prisma/client";
 export const dynamic = "force-dynamic";
 
 const STAGES: { stage: ProductionStage; label: string }[] = [
-  { stage: "CUTTING", label: "Cutting" },
-  { stage: "ASSEMBLY", label: "Assembly" },
-  { stage: "FINISHING", label: "Finishing" },
-  { stage: "QC", label: "Quality check" },
-  { stage: "READY", label: "Ready" },
+  { stage: "CUTTING", label: "חיתוך" },
+  { stage: "ASSEMBLY", label: "הרכבה" },
+  { stage: "FINISHING", label: "גימור" },
+  { stage: "QC", label: "בקרת איכות" },
+  { stage: "READY", label: "מוכן" },
 ];
 
 export default async function ProductionPage() {
@@ -25,8 +25,8 @@ export default async function ProductionPage() {
   return (
     <div>
       <PageHeader
-        title="Production"
-        description="Shop floor status across every open work order."
+        title="ייצור"
+        description="סטטוס רצפת הייצור עבור כל הזמנות העבודה הפתוחות."
       />
 
       <div className="flex gap-4 overflow-x-auto pb-4">
@@ -54,7 +54,7 @@ export default async function ProductionPage() {
                         {wo.project.client.name}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {wo.assignedTo ?? "Unassigned"} · due {formatDate(wo.dueDate)}
+                        {wo.assignedTo ?? "לא שויך"} · תאריך יעד {formatDate(wo.dueDate)}
                       </p>
                       <div className="mt-3">
                         <StageSelect workOrderId={wo.id} stage={wo.stage} />
@@ -64,7 +64,7 @@ export default async function ProductionPage() {
                 ))}
                 {items.length === 0 && (
                   <p className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
-                    Empty
+                    ריק
                   </p>
                 )}
               </div>

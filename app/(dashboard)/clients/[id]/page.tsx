@@ -29,7 +29,7 @@ export default async function ClientDetailPage({
         title={client.name}
         description={[client.email, client.phone, client.address]
           .filter(Boolean)
-          .join(" · ") || "No contact details on file"}
+          .join(" · ") || "אין פרטי קשר במערכת"}
         action={<NewProjectDialog clients={[client]} defaultClientId={client.id} />}
       />
 
@@ -37,17 +37,17 @@ export default async function ClientDetailPage({
         <Card className="mb-6">
           <CardContent className="p-5">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Notes
+              הערות
             </p>
             <p className="mt-1.5 text-sm text-foreground">{client.notes}</p>
           </CardContent>
         </Card>
       )}
 
-      <h2 className="mb-3 font-display text-lg text-foreground">Projects</h2>
+      <h2 className="mb-3 font-display text-lg text-foreground">פרויקטים</h2>
       {client.projects.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No projects yet for this client.
+          אין עדיין פרויקטים ללקוח זה.
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -60,9 +60,9 @@ export default async function ClientDetailPage({
                     <ProjectStatusBadge status={project.status} />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {project.budget ? formatCurrency(Number(project.budget)) : "No budget set"}
+                    {project.budget ? formatCurrency(Number(project.budget)) : "לא נקבע תקציב"}
                     {" · "}
-                    target {formatDate(project.targetDate)}
+                    יעד {formatDate(project.targetDate)}
                   </p>
                 </CardContent>
               </Card>

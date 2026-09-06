@@ -32,31 +32,31 @@ export default async function OverviewPage() {
   return (
     <div>
       <PageHeader
-        title="Overview"
-        description="Studio-wide snapshot of projects, pipeline, and production."
+        title="סקירה כללית"
+        description="תמונת מצב כוללת של הפרויקטים, צבר העבודות והייצור בסטודיו."
       />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Active projects" value={String(activeProjects.length)} />
-        <StatCard label="Clients" value={String(clients)} />
-        <StatCard label="Pipeline value" value={formatCurrency(pipelineValue)} />
-        <StatCard label="In production" value={String(workOrders.length)} />
+        <StatCard label="פרויקטים פעילים" value={String(activeProjects.length)} />
+        <StatCard label="לקוחות" value={String(clients)} />
+        <StatCard label="שווי צבר עבודות" value={formatCurrency(pipelineValue)} />
+        <StatCard label="בייצור" value={String(workOrders.length)} />
       </div>
 
       <Card>
         <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Recent projects</CardTitle>
+          <CardTitle>פרויקטים אחרונים</CardTitle>
           <Link
             href="/projects"
             className="text-sm font-medium text-accent hover:underline"
           >
-            View all
+            הצג הכול
           </Link>
         </CardHeader>
         <CardContent className="p-0">
           {recentProjects.length === 0 ? (
             <p className="px-5 pb-5 text-sm text-muted-foreground">
-              No projects yet. Create your first client and project to get started.
+              אין עדיין פרויקטים. צרו לקוח ופרויקט ראשונים כדי להתחיל.
             </p>
           ) : (
             <div className="divide-y divide-border">
@@ -69,7 +69,7 @@ export default async function OverviewPage() {
                   <div>
                     <p className="font-medium text-foreground">{project.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {project.client.name} · target {formatDate(project.targetDate)}
+                      {project.client.name} · יעד {formatDate(project.targetDate)}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ export default async function OverviewPage() {
       </Card>
 
       <div className="mt-4 text-sm text-muted-foreground">
-        {formatCurrency(approvedValue)} in approved quotes awaiting production.
+        {formatCurrency(approvedValue)} בהצעות מחיר מאושרות הממתינות לייצור.
       </div>
     </div>
   );

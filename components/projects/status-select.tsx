@@ -23,14 +23,14 @@ const STATUSES: ProjectStatus[] = [
 ];
 
 const LABEL: Record<ProjectStatus, string> = {
-  LEAD: "Lead",
-  DESIGN: "Design",
-  QUOTED: "Quoted",
-  APPROVED: "Approved",
-  PRODUCTION: "Production",
-  INSTALLATION: "Installation",
-  COMPLETE: "Complete",
-  CANCELLED: "Cancelled",
+  LEAD: "ליד",
+  DESIGN: "תכנון",
+  QUOTED: "הצעת מחיר",
+  APPROVED: "אושר",
+  PRODUCTION: "בייצור",
+  INSTALLATION: "התקנה",
+  COMPLETE: "הושלם",
+  CANCELLED: "בוטל",
 };
 
 export function ProjectStatusSelect({

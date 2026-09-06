@@ -42,16 +42,16 @@ export default async function ProjectDetailPage({
       <PageHeader
         title={project.name}
         description={`${project.client.name} · ${
-          project.budget ? formatCurrency(Number(project.budget)) : "no budget set"
-        } · target ${formatDate(project.targetDate)}`}
+          project.budget ? formatCurrency(Number(project.budget)) : "לא נקבע תקציב"
+        } · יעד ${formatDate(project.targetDate)}`}
         action={<ProjectStatusSelect projectId={project.id} status={project.status} />}
       />
 
       <Tabs defaultValue="specs">
         <TabsList>
-          <TabsTrigger value="specs">Design specs</TabsTrigger>
-          <TabsTrigger value="quotes">Quotes</TabsTrigger>
-          <TabsTrigger value="production">Production</TabsTrigger>
+          <TabsTrigger value="specs">מפרט עיצוב</TabsTrigger>
+          <TabsTrigger value="quotes">הצעות מחיר</TabsTrigger>
+          <TabsTrigger value="production">ייצור</TabsTrigger>
         </TabsList>
 
         {/* ---------- SPECS ---------- */}
@@ -61,7 +61,7 @@ export default async function ProjectDetailPage({
           </div>
 
           {project.rooms.length === 0 ? (
-            <EmptyState message="No rooms added yet." />
+            <EmptyState message="טרם נוספו חדרים." />
           ) : (
             <div className="space-y-4">
               {project.rooms.map((room) => (
@@ -76,7 +76,7 @@ export default async function ProjectDetailPage({
                       />
                     </div>
                     {room.specs.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No specs yet.</p>
+                      <p className="text-sm text-muted-foreground">טרם נוספו מפרטים.</p>
                     ) : (
                       <div className="divide-y divide-border">
                         {room.specs.map((spec) => (
@@ -109,7 +109,7 @@ export default async function ProjectDetailPage({
           </div>
 
           {project.quotes.length === 0 ? (
-            <EmptyState message="No quotes yet." />
+            <EmptyState message="טרם נוצרו הצעות מחיר." />
           ) : (
             <div className="space-y-4">
               {project.quotes.map((quote) => (
@@ -117,7 +117,7 @@ export default async function ProjectDetailPage({
                   <CardContent className="p-5">
                     <div className="mb-3 flex items-center justify-between">
                       <p className="font-display text-base text-foreground">
-                        Quote v{quote.version}
+                        הצעת מחיר גרסה {quote.version}
                       </p>
                       <div className="flex items-center gap-2">
                         <QuoteStatusBadge status={quote.status} />
@@ -140,10 +140,10 @@ export default async function ProjectDetailPage({
                       ))}
                     </div>
                     <div className="mt-3 flex justify-end gap-6 text-sm text-muted-foreground">
-                      <span>Subtotal {formatCurrency(Number(quote.subtotal))}</span>
-                      <span>Tax {formatCurrency(Number(quote.tax))}</span>
+                      <span>סכום ביניים {formatCurrency(Number(quote.subtotal))}</span>
+                      <span>מע&quot;מ {formatCurrency(Number(quote.tax))}</span>
                       <span className="font-medium text-foreground">
-                        Total {formatCurrency(Number(quote.total))}
+                        סה&quot;כ {formatCurrency(Number(quote.total))}
                       </span>
                     </div>
                   </CardContent>
@@ -160,7 +160,7 @@ export default async function ProjectDetailPage({
           </div>
 
           {project.workOrders.length === 0 ? (
-            <EmptyState message="No work orders yet." />
+            <EmptyState message="טרם נוצרו הזמנות עבודה." />
           ) : (
             <div className="space-y-3">
               {project.workOrders.map((wo) => (
@@ -168,10 +168,10 @@ export default async function ProjectDetailPage({
                   <CardContent className="flex items-center justify-between p-5">
                     <div>
                       <p className="font-medium text-foreground">
-                        {wo.assignedTo ?? "Unassigned"}
+                        {wo.assignedTo ?? "לא שויך"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Due {formatDate(wo.dueDate)}
+                        תאריך יעד {formatDate(wo.dueDate)}
                         {wo.notes ? ` · ${wo.notes}` : ""}
                       </p>
                     </div>

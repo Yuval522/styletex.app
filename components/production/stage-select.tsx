@@ -13,11 +13,11 @@ import type { ProductionStage } from "@prisma/client";
 
 const STAGES: ProductionStage[] = ["CUTTING", "ASSEMBLY", "FINISHING", "QC", "READY"];
 const LABEL: Record<ProductionStage, string> = {
-  CUTTING: "Cutting",
-  ASSEMBLY: "Assembly",
-  FINISHING: "Finishing",
-  QC: "Quality check",
-  READY: "Ready",
+  CUTTING: "חיתוך",
+  ASSEMBLY: "הרכבה",
+  FINISHING: "גימור",
+  QC: "בקרת איכות",
+  READY: "מוכן",
 };
 
 export function StageSelect({

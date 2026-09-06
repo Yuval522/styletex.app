@@ -21,35 +21,35 @@ export function NewSupplierDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Plus /> New supplier
+          <Plus /> ספק חדש
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New supplier</DialogTitle>
+          <DialogTitle>ספק חדש</DialogTitle>
         </DialogHeader>
         <form action={createSupplier} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" name="name" required placeholder="Northshore Millwork" />
+            <Label htmlFor="name">שם</Label>
+            <Input id="name" name="name" required placeholder="נגריית הצפון" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="contact">Contact person</Label>
-            <Input id="contact" name="contact" placeholder="Dana Reyes" />
+            <Label htmlFor="contact">איש קשר</Label>
+            <Input id="contact" name="contact" placeholder="דנה כהן" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">אימייל</Label>
               <Input id="email" name="email" type="email" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">טלפון</Label>
               <Input id="phone" name="phone" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              Add supplier
+              הוסף ספק
             </Button>
           </div>
         </form>

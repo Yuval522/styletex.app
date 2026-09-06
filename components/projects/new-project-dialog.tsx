@@ -35,25 +35,25 @@ export function NewProjectDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="accent">
-          <Plus /> New project
+          <Plus /> פרויקט חדש
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New project</DialogTitle>
+          <DialogTitle>פרויקט חדש</DialogTitle>
         </DialogHeader>
         <form action={createProject} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Project name</Label>
-            <Input id="name" name="name" required placeholder="Miles Residence — Kitchen" />
+            <Label htmlFor="name">שם הפרויקט</Label>
+            <Input id="name" name="name" required placeholder="דירת כהן — מטבח" />
           </div>
 
           <div className="space-y-1.5">
-            <Label>Client</Label>
+            <Label>לקוח</Label>
             <input type="hidden" name="clientId" value={clientId} />
             <Select value={clientId} onValueChange={setClientId} required>
               <SelectTrigger>
-                <SelectValue placeholder="Select a client" />
+                <SelectValue placeholder="בחר לקוח" />
               </SelectTrigger>
               <SelectContent>
                 {clients.map((c) => (
@@ -67,18 +67,18 @@ export function NewProjectDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="budget">Budget</Label>
+              <Label htmlFor="budget">תקציב</Label>
               <Input id="budget" name="budget" type="number" placeholder="45000" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="targetDate">Target date</Label>
+              <Label htmlFor="targetDate">תאריך יעד</Label>
               <Input id="targetDate" name="targetDate" type="date" />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent" disabled={!clientId}>
-              Create project
+              צור פרויקט
             </Button>
           </div>
         </form>

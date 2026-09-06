@@ -13,6 +13,13 @@ import type { QuoteStatus } from "@prisma/client";
 
 const STATUSES: QuoteStatus[] = ["DRAFT", "SENT", "APPROVED", "REJECTED"];
 
+const LABEL: Record<QuoteStatus, string> = {
+  DRAFT: "טיוטה",
+  SENT: "נשלח",
+  APPROVED: "אושר",
+  REJECTED: "נדחה",
+};
+
 export function QuoteStatusSelect({
   projectId,
   quoteId,
@@ -33,13 +40,13 @@ export function QuoteStatusSelect({
         })
       }
     >
-      <SelectTrigger className="h-8 w-[120px] text-xs capitalize" disabled={isPending}>
+      <SelectTrigger className="h-8 w-[120px] text-xs" disabled={isPending}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {STATUSES.map((s) => (
-          <SelectItem key={s} value={s} className="capitalize">
-            {s.toLowerCase()}
+          <SelectItem key={s} value={s}>
+            {LABEL[s]}
           </SelectItem>
         ))}
       </SelectContent>

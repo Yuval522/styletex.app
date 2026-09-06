@@ -22,21 +22,21 @@ export function NewRoomDialog({ projectId }: { projectId: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Plus /> Add room
+          <Plus /> הוסף חדר
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add room</DialogTitle>
+          <DialogTitle>הוספת חדר</DialogTitle>
         </DialogHeader>
         <form action={action} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Room name</Label>
-            <Input id="name" name="name" required placeholder="Kitchen" />
+            <Label htmlFor="name">שם החדר</Label>
+            <Input id="name" name="name" required placeholder="מטבח" />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              Add room
+              הוסף חדר
             </Button>
           </div>
         </form>

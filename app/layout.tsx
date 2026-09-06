@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Rubik, Fraunces } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["latin", "hebrew"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const fraunces = Fraunces({
@@ -16,7 +17,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: "Styletex Kitchens",
-  description: "Custom kitchen & cabinetry project management",
+  description: "ניהול פרויקטים למטבחים וארונות בהתאמה אישית",
 };
 
 export default function RootLayout({
@@ -25,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${fraunces.variable} antialiased`}>
+    <html lang="he" dir="rtl">
+      <body className={`${rubik.variable} ${fraunces.variable} antialiased`}>
         {children}
       </body>
     </html>

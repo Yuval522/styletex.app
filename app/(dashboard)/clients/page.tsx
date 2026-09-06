@@ -23,23 +23,23 @@ export default async function ClientsPage() {
   return (
     <div>
       <PageHeader
-        title="Clients"
-        description="Every household and account on the books."
+        title="לקוחות"
+        description="כל משק בית וחשבון הרשומים במערכת."
         action={<NewClientDialog />}
       />
 
       {clients.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No clients yet — add your first client to start a project.
+          אין עדיין לקוחות — הוסיפו לקוח ראשון כדי להתחיל פרויקט.
         </p>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Client</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Projects</TableHead>
+              <TableHead>לקוח</TableHead>
+              <TableHead>פרטי קשר</TableHead>
+              <TableHead>כתובת</TableHead>
+              <TableHead>פרויקטים</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

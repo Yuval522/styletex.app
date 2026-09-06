@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
 
 const PROJECT_STATUS_LABEL: Record<string, string> = {
-  LEAD: "Lead",
-  DESIGN: "Design",
-  QUOTED: "Quoted",
-  APPROVED: "Approved",
-  PRODUCTION: "Production",
-  INSTALLATION: "Installation",
-  COMPLETE: "Complete",
-  CANCELLED: "Cancelled",
+  LEAD: "ליד",
+  DESIGN: "תכנון",
+  QUOTED: "הצעת מחיר",
+  APPROVED: "אושר",
+  PRODUCTION: "בייצור",
+  INSTALLATION: "התקנה",
+  COMPLETE: "הושלם",
+  CANCELLED: "בוטל",
 };
 
 const PROJECT_STATUS_COLOR: Record<string, string> = {
@@ -35,6 +35,13 @@ export function ProjectStatusBadge({ status }: { status: string }) {
   );
 }
 
+const QUOTE_STATUS_LABEL: Record<string, string> = {
+  DRAFT: "טיוטה",
+  SENT: "נשלח",
+  APPROVED: "אושר",
+  REJECTED: "נדחה",
+};
+
 const QUOTE_STATUS_COLOR: Record<string, string> = {
   DRAFT: "bg-status-lead/15 text-status-lead",
   SENT: "bg-status-design/15 text-status-design",
@@ -46,21 +53,21 @@ export function QuoteStatusBadge({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize whitespace-nowrap",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
         QUOTE_STATUS_COLOR[status] ?? "bg-surface-muted text-foreground"
       )}
     >
-      {status.toLowerCase()}
+      {QUOTE_STATUS_LABEL[status] ?? status}
     </span>
   );
 }
 
 const STAGE_LABEL: Record<string, string> = {
-  CUTTING: "Cutting",
-  ASSEMBLY: "Assembly",
-  FINISHING: "Finishing",
-  QC: "Quality Check",
-  READY: "Ready",
+  CUTTING: "חיתוך",
+  ASSEMBLY: "הרכבה",
+  FINISHING: "גימור",
+  QC: "בקרת איכות",
+  READY: "מוכן",
 };
 
 export function StageBadge({ stage }: { stage: string }) {
