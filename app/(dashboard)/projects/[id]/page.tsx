@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuoteStatusBadge } from "@/components/shared/status-badge";
 import { ProjectStatusSelect } from "@/components/projects/status-select";
+import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
 import { NewRoomDialog } from "@/components/specs/new-room-dialog";
 import { NewSpecDialog } from "@/components/specs/new-spec-dialog";
 import { NewQuoteDialog } from "@/components/quotes/new-quote-dialog";
@@ -44,7 +45,20 @@ export default async function ProjectDetailPage({
         description={`${project.client.name} · ${
           project.budget ? formatCurrency(Number(project.budget)) : "לא נקבע תקציב"
         } · יעד ${formatDate(project.targetDate)}`}
-        action={<ProjectStatusSelect projectId={project.id} status={project.status} />}
+        action={
+          <div className="flex items-center gap-2">
+            <EditProjectDialog
+              project={{
+                id: project.id,
+                name: project.name,
+                budget: project.budget ? Number(project.budget) : null,
+                startDate: project.startDate,
+                targetDate: project.targetDate,
+              }}
+            />
+            <ProjectStatusSelect projectId={project.id} status={project.status} />
+          </div>
+        }
       />
 
       <Tabs defaultValue="specs">

@@ -17,11 +17,12 @@ export function formatCurrency(value: number | string | null | undefined) {
 export function formatDate(value: Date | string | null | undefined) {
   if (!value) return "—";
   const date = typeof value === "string" ? new Date(value) : value;
-  return new Intl.DateTimeFormat("he-IL", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  // Wrapped in Unicode isolate marks (LRI ... PDI) so the numeric
+  // DD/MM/YYYY sequence never visually reorders inside RTL text flow.
+  return `⁦${day}/${month}/${year}⁩`;
 }
 
 export function initials(name: string) {

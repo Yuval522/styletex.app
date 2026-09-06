@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
 import { NewClientDialog } from "@/components/clients/new-client-dialog";
+import { EditClientDialog } from "@/components/clients/edit-client-dialog";
 import {
   Table,
   TableBody,
@@ -40,6 +41,7 @@ export default async function ClientsPage() {
               <TableHead>פרטי קשר</TableHead>
               <TableHead>כתובת</TableHead>
               <TableHead>פרויקטים</TableHead>
+              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,6 +68,9 @@ export default async function ClientsPage() {
                   {client.address ?? "—"}
                 </TableCell>
                 <TableCell>{client._count.projects}</TableCell>
+                <TableCell>
+                  <EditClientDialog client={client} />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

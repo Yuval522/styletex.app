@@ -28,6 +28,33 @@ export async function createMaterial(formData: FormData) {
   revalidatePath("/materials");
 }
 
+export async function updateMaterial(id: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const type = String(formData.get("type") ?? "OTHER") as MaterialType;
+  const unitCost = Number(formData.get("unitCost") ?? 0);
+  const unit = String(formData.get("unit") ?? "").trim();
+  const stockQty = String(formData.get("stockQty") ?? "").trim();
+  const reorderLevel = String(formData.get("reorderLevel") ?? "").trim();
+  const supplierId = String(formData.get("supplierId") ?? "") || null;
+
+  if (!name || !unit) throw new Error("Name and unit are required");
+
+  await prisma.material.update({
+    where: { id },
+    data: {
+      name,
+      type,
+      unitCost,
+      unit,
+      stockQty: stockQty ? Number(stockQty) : null,
+      reorderLevel: reorderLevel ? Number(reorderLevel) : null,
+      supplierId,
+    },
+  });
+
+  revalidatePath("/materials");
+}
+
 export async function createSupplier(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const contact = String(formData.get("contact") ?? "").trim() || null;

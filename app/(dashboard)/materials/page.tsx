@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
 import { NewMaterialDialog } from "@/components/materials/new-material-dialog";
 import { NewSupplierDialog } from "@/components/materials/new-supplier-dialog";
+import { EditMaterialDialog } from "@/components/materials/edit-material-dialog";
 import {
   Table,
   TableBody,
@@ -57,6 +58,7 @@ export default async function MaterialsPage() {
               <TableHead>עלות ליחידה</TableHead>
               <TableHead>מלאי</TableHead>
               <TableHead>ספק</TableHead>
+              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -87,6 +89,21 @@ export default async function MaterialsPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {m.supplier?.name ?? "—"}
+                  </TableCell>
+                  <TableCell>
+                    <EditMaterialDialog
+                      material={{
+                        id: m.id,
+                        name: m.name,
+                        type: m.type,
+                        unitCost: Number(m.unitCost),
+                        unit: m.unit,
+                        stockQty: m.stockQty != null ? Number(m.stockQty) : null,
+                        reorderLevel: m.reorderLevel != null ? Number(m.reorderLevel) : null,
+                        supplierId: m.supplierId,
+                      }}
+                      suppliers={suppliers}
+                    />
                   </TableCell>
                 </TableRow>
               );
