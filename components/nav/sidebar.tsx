@@ -13,6 +13,7 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export const NAV_ITEMS = [
   { href: "/", label: "סקירה כללית", icon: LayoutDashboard },
@@ -24,8 +25,16 @@ export const NAV_ITEMS = [
   { href: "/materials", label: "חומרים", icon: Boxes },
 ];
 
+type SidebarUser = { name?: string | null; email?: string | null };
+
 /** Nav content shared by the fixed desktop sidebar and the mobile drawer. */
-export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarContent({
+  onNavigate,
+  user,
+}: {
+  onNavigate?: () => void;
+  user?: SidebarUser;
+}) {
   const pathname = usePathname();
 
   return (
@@ -76,15 +85,29 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           הגדרות
         </Link>
       </div>
+
+      {user && (
+        <div className="border-t border-border p-3">
+          <div className="px-3 pb-2">
+            <p className="truncate text-sm font-medium text-foreground">
+              {user.name ?? "משתמש"}
+            </p>
+            <p className="truncate text-xs text-muted-foreground" dir="ltr">
+              {user.email}
+            </p>
+          </div>
+          <SignOutButton />
+        </div>
+      )}
     </div>
   );
 }
 
 /** Fixed rail shown on large screens only; mobile uses MobileNav instead. */
-export function Sidebar() {
+export function Sidebar({ user }: { user?: SidebarUser }) {
   return (
     <aside className="hidden h-screen w-64 shrink-0 flex-col border-e border-border bg-surface lg:flex">
-      <SidebarContent />
+      <SidebarContent user={user} />
     </aside>
   );
 }

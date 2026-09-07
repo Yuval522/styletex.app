@@ -8,6 +8,8 @@ export async function createWorkOrder(projectId: string, formData: FormData) {
   const assignedTo = String(formData.get("assignedTo") ?? "").trim() || null;
   const dueDateRaw = String(formData.get("dueDate") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const stageRaw = String(formData.get("stage") ?? "").trim();
+  const stage = stageRaw ? (stageRaw as ProductionStage) : undefined;
 
   await prisma.workOrder.create({
     data: {
@@ -15,6 +17,7 @@ export async function createWorkOrder(projectId: string, formData: FormData) {
       assignedTo,
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
       notes,
+      ...(stage ? { stage } : {}),
     },
   });
 
@@ -25,6 +28,14 @@ export async function createWorkOrder(projectId: string, formData: FormData) {
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath("/production");
+  revalidatePath("/projects");
+}
+
+export async function deleteWorkOrder(id: string) {
+  const workOrder = await prisma.workOrder.delete({ where: { id } });
+
+  revalidatePath("/production");
+  revalidatePath(`/projects/${workOrder.projectId}`);
   revalidatePath("/projects");
 }
 

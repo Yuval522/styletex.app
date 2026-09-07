@@ -12,6 +12,7 @@ import {
 import { QuoteStatusBadge } from "@/components/shared/status-badge";
 import { QuoteStatusSelect } from "@/components/quotes/quote-status-select";
 import { QuotePdfActions } from "@/components/quotes/quote-pdf-actions";
+import { NewQuoteDialog } from "@/components/quotes/new-quote-dialog";
 import { PaymentToggle } from "@/components/quotes/payment-toggle";
 import { DeleteButton } from "@/components/shared/delete-button";
 import { deleteQuote } from "@/actions/quotes";
@@ -20,7 +21,8 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function QuotesPage() {
-  const quotes = await prisma.quote.findMany({
+  const [quotes, projects] = await Promise.all([
+    prisma.quote.findMany({
     select: {
       id: true,
       version: true,
@@ -40,19 +42,33 @@ export default async function QuotesPage() {
         },
       },
     },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.project.findMany({
+      select: { id: true, name: true, client: { select: { name: true } } },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
 
   return (
     <div>
       <PageHeader
         title="מעקב הצעות מחיר"
         description="כל הצעות המחיר במערכת, לפי לקוח, סטטוס וסכום."
+        action={
+          projects.length > 0 ? (
+            <NewQuoteDialog projects={projects} />
+          ) : undefined
+        }
       />
 
-      {quotes.length === 0 ? (
+      {projects.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          עדיין אין הצעות מחיר. ניתן ליצור הצעת מחיר חדשה מתוך עמוד הפרויקט.
+          יש ליצור פרויקט לפני הוספת הצעת מחיר.
+        </p>
+      ) : quotes.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          עדיין אין הצעות מחיר. השתמשו בכפתור למעלה כדי ליצור את הראשונה.
         </p>
       ) : (
         <Table>

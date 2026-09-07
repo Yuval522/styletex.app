@@ -16,6 +16,7 @@ import { StageSelect } from "@/components/production/stage-select";
 import { DeleteButton } from "@/components/shared/delete-button";
 import { deleteProject } from "@/actions/projects";
 import { deleteQuote } from "@/actions/quotes";
+import { deleteWorkOrder } from "@/actions/work-orders";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -221,7 +222,13 @@ export default async function ProjectDetailPage({
                         {wo.notes ? ` · ${wo.notes}` : ""}
                       </p>
                     </div>
-                    <StageSelect workOrderId={wo.id} stage={wo.stage} />
+                    <div className="flex items-center gap-2">
+                      <StageSelect workOrderId={wo.id} stage={wo.stage} />
+                      <DeleteButton
+                        onDelete={deleteWorkOrder.bind(null, wo.id)}
+                        confirmMessage="למחוק הזמנת עבודה זו? הפעולה אינה הפיכה."
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               ))}

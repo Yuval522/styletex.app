@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,16 +13,38 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createQuote } from "@/actions/quotes";
 
 type LineItem = { id: number; description: string; quantity: string; unitPrice: string };
+type ProjectOption = { id: string; name: string; client: { name: string } };
 
-export function NewQuoteDialog({ projectId }: { projectId: string }) {
+const EMPTY_ITEM: LineItem = { id: 1, description: "", quantity: "1", unitPrice: "" };
+
+/**
+ * Used two ways: pinned to a known project (from the project detail page,
+ * pass `projectId`) or standalone (from the Quotes tracking page, pass
+ * `projects` and the user picks one from a dropdown first).
+ */
+export function NewQuoteDialog({
+  projectId,
+  projects,
+}: {
+  projectId?: string;
+  projects?: ProjectOption[];
+}) {
+  const needsProjectPicker = !projectId;
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<LineItem[]>([
-    { id: 1, description: "", quantity: "1", unitPrice: "" },
-  ]);
-  const action = createQuote.bind(null, projectId);
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId ?? "");
+  const [items, setItems] = useState<LineItem[]>([{ ...EMPTY_ITEM }]);
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
 
   function addItem() {
     setItems((prev) => [
@@ -32,6 +55,20 @@ export function NewQuoteDialog({ projectId }: { projectId: string }) {
 
   function removeItem(id: number) {
     setItems((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  async function handleSubmit(formData: FormData) {
+    if (!selectedProjectId) return;
+    setPending(true);
+    try {
+      await createQuote(selectedProjectId, formData);
+      router.refresh();
+      setOpen(false);
+      setItems([{ ...EMPTY_ITEM }]);
+      if (needsProjectPicker) setSelectedProjectId("");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -45,7 +82,25 @@ export function NewQuoteDialog({ projectId }: { projectId: string }) {
         <DialogHeader>
           <DialogTitle>הצעת מחיר חדשה</DialogTitle>
         </DialogHeader>
-        <form action={action} className="space-y-4">
+        <form action={handleSubmit} className="space-y-4">
+          {needsProjectPicker && (
+            <div className="space-y-1.5">
+              <Label>פרויקט</Label>
+              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="בחר פרויקט" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(projects ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} · {p.client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             {items.map((item) => (
               <div key={item.id} className="flex flex-wrap items-end gap-2 sm:flex-nowrap">
@@ -96,8 +151,8 @@ export function NewQuoteDialog({ projectId }: { projectId: string }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="submit" variant="accent">
-              צור הצעת מחיר
+            <Button type="submit" variant="accent" disabled={pending || !selectedProjectId}>
+              {pending ? "יוצר…" : "צור הצעת מחיר"}
             </Button>
           </div>
         </form>

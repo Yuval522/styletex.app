@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SidebarContent } from "@/components/nav/sidebar";
 
+type MobileNavUser = { name?: string | null; email?: string | null };
+
 /** Top bar + slide-in drawer shown on small screens only. */
-export function MobileNav() {
+export function MobileNav({ user }: { user?: MobileNavUser }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -46,7 +48,7 @@ export function MobileNav() {
                 <X className="size-5" />
               </button>
             </div>
-            <SidebarContent onNavigate={() => setOpen(false)} />
+            <SidebarContent onNavigate={() => setOpen(false)} user={user} />
           </div>
         </div>
       )}
