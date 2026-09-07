@@ -1,0 +1,5 @@
+// This project's request-interception hook lives in proxy.ts now —
+// Next.js 16 renamed the `middleware.ts` file convention to `proxy.ts`.
+// Keeping both files with real logic can conflict, so this file is
+// intentionally inert (no `middleware`/default function export).
+export {};
