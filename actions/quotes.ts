@@ -31,6 +31,8 @@ export async function createQuote(projectId: string, formData: FormData) {
 
   const existingCount = await prisma.quote.count({ where: { projectId } });
 
+  const pdfFields = await readPdfField(formData);
+
   await prisma.quote.create({
     data: {
       projectId,
@@ -39,6 +41,7 @@ export async function createQuote(projectId: string, formData: FormData) {
       tax,
       total,
       lineItems: { create: lineItems },
+      ...pdfFields,
     },
   });
 
@@ -49,6 +52,49 @@ export async function createQuote(projectId: string, formData: FormData) {
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath("/projects");
+  revalidatePath("/quotes");
+}
+
+async function readPdfField(formData: FormData) {
+  const file = formData.get("pdf");
+  if (!(file instanceof File) || file.size === 0) return {};
+  if (file.type !== "application/pdf") {
+    throw new Error("ניתן לצרף קובץ PDF בלבד");
+  }
+  const buffer = Buffer.from(await file.arrayBuffer());
+  return {
+    pdfData: buffer,
+    pdfFileName: file.name,
+    pdfMimeType: file.type,
+    pdfSize: file.size,
+  };
+}
+
+export async function attachQuotePdf(quoteId: string, formData: FormData) {
+  const pdfFields = await readPdfField(formData);
+  if (!pdfFields.pdfData) {
+    throw new Error("לא נבחר קובץ PDF");
+  }
+
+  const quote = await prisma.quote.update({
+    where: { id: quoteId },
+    data: pdfFields,
+    select: { projectId: true },
+  });
+
+  revalidatePath(`/projects/${quote.projectId}`);
+  revalidatePath("/quotes");
+}
+
+export async function removeQuotePdf(quoteId: string) {
+  const quote = await prisma.quote.update({
+    where: { id: quoteId },
+    data: { pdfData: null, pdfFileName: null, pdfMimeType: null, pdfSize: null },
+    select: { projectId: true },
+  });
+
+  revalidatePath(`/projects/${quote.projectId}`);
+  revalidatePath("/quotes");
 }
 
 export async function updateQuoteStatus(
@@ -70,4 +116,5 @@ export async function updateQuoteStatus(
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath("/projects");
+  revalidatePath("/quotes");
 }

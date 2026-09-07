@@ -10,6 +10,7 @@ import { NewRoomDialog } from "@/components/specs/new-room-dialog";
 import { NewSpecDialog } from "@/components/specs/new-spec-dialog";
 import { NewQuoteDialog } from "@/components/quotes/new-quote-dialog";
 import { QuoteStatusSelect } from "@/components/quotes/quote-status-select";
+import { QuotePdfActions } from "@/components/quotes/quote-pdf-actions";
 import { NewWorkOrderDialog } from "@/components/production/new-work-order-dialog";
 import { StageSelect } from "@/components/production/stage-select";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -29,7 +30,11 @@ export default async function ProjectDetailPage({
       include: {
         client: true,
         rooms: { include: { specs: { include: { material: true } } } },
-        quotes: { include: { lineItems: true }, orderBy: { version: "desc" } },
+        quotes: {
+          include: { lineItems: true },
+          omit: { pdfData: true },
+          orderBy: { version: "desc" },
+        },
         workOrders: { orderBy: { createdAt: "desc" } },
       },
     }),
@@ -152,6 +157,12 @@ export default async function ProjectDetailPage({
                           </span>
                         </div>
                       ))}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <QuotePdfActions quoteId={quote.id} fileName={quote.pdfFileName} />
+                      <p className="text-xs text-muted-foreground">
+                        נוצר {formatDate(quote.createdAt)}
+                      </p>
                     </div>
                     <div className="mt-3 flex justify-end gap-6 text-sm text-muted-foreground">
                       <span>סכום ביניים {formatCurrency(Number(quote.subtotal))}</span>

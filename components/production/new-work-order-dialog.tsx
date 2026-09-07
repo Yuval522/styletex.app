@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createWorkOrder } from "@/actions/work-orders";
@@ -37,7 +38,7 @@ export function NewWorkOrderDialog({ projectId }: { projectId: string }) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="dueDate">תאריך יעד</Label>
-            <Input id="dueDate" name="dueDate" type="date" />
+            <DateInput id="dueDate" name="dueDate" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="notes">הערות</Label>

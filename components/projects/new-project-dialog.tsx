@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -72,7 +73,7 @@ export function NewProjectDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="targetDate">תאריך יעד</Label>
-              <Input id="targetDate" name="targetDate" type="date" />
+              <DateInput id="targetDate" name="targetDate" />
             </div>
           </div>
 

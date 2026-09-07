@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -122,17 +123,16 @@ export function NewEventDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="startAt">תאריך התחלה</Label>
-              <Input
+              <DateInput
                 id="startAt"
                 name="startAt"
-                type="date"
                 required
                 defaultValue={defaultDate ? toDateInputValue(defaultDate) : undefined}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="endAt">תאריך סיום (לא חובה)</Label>
-              <Input id="endAt" name="endAt" type="date" />
+              <DateInput id="endAt" name="endAt" />
             </div>
           </div>
 

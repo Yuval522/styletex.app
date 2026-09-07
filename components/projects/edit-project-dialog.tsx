@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { updateProject } from "@/actions/projects";
 
@@ -83,19 +84,17 @@ export function EditProjectDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="edit-project-start">תאריך התחלה</Label>
-              <Input
+              <DateInput
                 id="edit-project-start"
                 name="startDate"
-                type="date"
                 defaultValue={toDateInputValue(project.startDate)}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="edit-project-target">תאריך יעד</Label>
-              <Input
+              <DateInput
                 id="edit-project-target"
                 name="targetDate"
-                type="date"
                 defaultValue={toDateInputValue(project.targetDate)}
               />
             </div>

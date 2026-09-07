@@ -78,9 +78,21 @@ export function NewQuoteDialog({ projectId }: { projectId: string }) {
             <Plus /> הוסף שורה
           </Button>
 
-          <div className="w-40 space-y-1.5">
-            <Label htmlFor="tax">מע&quot;מ</Label>
-            <Input id="tax" name="tax" type="number" step="0.01" defaultValue="0" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="tax">מע&quot;מ</Label>
+              <Input id="tax" name="tax" type="number" step="0.01" defaultValue="0" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pdf">קובץ הצעת מחיר (PDF, לא חובה)</Label>
+              <input
+                id="pdf"
+                name="pdf"
+                type="file"
+                accept="application/pdf"
+                className="block w-full text-sm text-muted-foreground file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-border/60"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

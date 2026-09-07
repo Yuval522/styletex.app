@@ -9,6 +9,7 @@ import {
   Boxes,
   Hammer,
   CalendarDays,
+  FileText,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ const nav = [
   { href: "/", label: "סקירה כללית", icon: LayoutDashboard },
   { href: "/clients", label: "לקוחות", icon: Users },
   { href: "/projects", label: "פרויקטים", icon: FolderKanban },
+  { href: "/quotes", label: "מעקב הצעות מחיר", icon: FileText },
   { href: "/calendar", label: "לוח שנה", icon: CalendarDays },
   { href: "/production", label: "ייצור", icon: Hammer },
   { href: "/materials", label: "חומרים", icon: Boxes },
