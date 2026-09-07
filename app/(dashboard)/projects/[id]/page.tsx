@@ -17,6 +17,7 @@ import { DeleteButton } from "@/components/shared/delete-button";
 import { deleteProject } from "@/actions/projects";
 import { deleteQuote } from "@/actions/quotes";
 import { deleteWorkOrder } from "@/actions/work-orders";
+import { deleteRoom, deleteCabinetSpec } from "@/actions/specs";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -104,20 +105,26 @@ export default async function ProjectDetailPage({
               {project.rooms.map((room) => (
                 <Card key={room.id}>
                   <CardContent className="p-5">
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="mb-3 flex items-center justify-between gap-2">
                       <p className="font-display text-base text-foreground">{room.name}</p>
-                      <NewSpecDialog
-                        projectId={project.id}
-                        roomId={room.id}
-                        materials={materials}
-                      />
+                      <div className="flex items-center gap-2">
+                        <NewSpecDialog
+                          projectId={project.id}
+                          roomId={room.id}
+                          materials={materials}
+                        />
+                        <DeleteButton
+                          onDelete={deleteRoom.bind(null, room.id)}
+                          confirmMessage={`למחוק את החדר "${room.name}"? פעולה זו תמחק גם את כל המפרטים בו ואינה הפיכה.`}
+                        />
+                      </div>
                     </div>
                     {room.specs.length === 0 ? (
                       <p className="text-sm text-muted-foreground">טרם נוספו מפרטים.</p>
                     ) : (
                       <div className="divide-y divide-border">
                         {room.specs.map((spec) => (
-                          <div key={spec.id} className="flex items-center justify-between py-3 text-sm">
+                          <div key={spec.id} className="flex items-center justify-between gap-2 py-3 text-sm">
                             <div>
                               <p className="font-medium text-foreground">
                                 {spec.doorStyle} · {spec.finish}
@@ -128,6 +135,10 @@ export default async function ProjectDetailPage({
                                 {spec.hardware ? ` · ${spec.hardware}` : ""}
                               </p>
                             </div>
+                            <DeleteButton
+                              onDelete={deleteCabinetSpec.bind(null, project.id, spec.id)}
+                              confirmMessage="למחוק מפרט זה? הפעולה אינה הפיכה."
+                            />
                           </div>
                         ))}
                       </div>

@@ -14,6 +14,14 @@ export async function createRoom(projectId: string, formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
 }
 
+export async function deleteRoom(id: string) {
+  // CabinetSpec.room has onDelete: Cascade, so this also removes every
+  // spec that belonged to the room.
+  const room = await prisma.room.delete({ where: { id } });
+
+  revalidatePath(`/projects/${room.projectId}`);
+}
+
 export async function createCabinetSpec(
   projectId: string,
   roomId: string,
@@ -41,6 +49,12 @@ export async function createCabinetSpec(
       materialId,
     },
   });
+
+  revalidatePath(`/projects/${projectId}`);
+}
+
+export async function deleteCabinetSpec(projectId: string, id: string) {
+  await prisma.cabinetSpec.delete({ where: { id } });
 
   revalidatePath(`/projects/${projectId}`);
 }

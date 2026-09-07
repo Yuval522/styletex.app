@@ -5,21 +5,25 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 /**
- * This script wipes all business data so the app starts from a clean
- * slate — no demo clients, projects, quotes, materials, or calendar
- * events. It does NOT insert any sample/mock data.
+ * By default this script ONLY makes sure the two Styletex team accounts
+ * (Yuval & Itamar) exist so they can log in — it is safe to run at any
+ * time against the live database, including after real clients,
+ * projects, and quotes have been entered. It never inserts sample/mock
+ * data.
  *
- * Deletion order respects foreign-key dependencies (children before
- * parents), so it works regardless of each relation's cascade setting.
- * Run with: npm run db:seed
+ * Login accounts are NEVER deleted by this script. On first run (or
+ * whenever an account doesn't exist yet), a strong random password is
+ * generated and printed once to the terminal — it is never stored in
+ * this file or in git. Save it immediately; it cannot be recovered
+ * afterwards (only reset, by deleting the row and re-running this
+ * script).
  *
- * It also makes sure the two Styletex team accounts (Yuval & Itamar)
- * exist so they can log in. Login accounts are NEVER deleted by this
- * script — only business data is wiped. On first run (or whenever an
- * account doesn't exist yet), a strong random password is generated and
- * printed once to the terminal — it is never stored in this file or in
- * git. Save it immediately; it cannot be recovered afterwards (only
- * reset, by deleting the row and re-running this script).
+ * Wiping ALL business data (clients, projects, quotes, materials,
+ * calendar events) is a separate, explicit, opt-in action — it is NOT
+ * something this script does by accident. Only run it against an empty
+ * dev/staging database, never against live production data:
+ *
+ *   SEED_WIPE_DATA=1 npm run db:seed
  */
 
 const TEAM_ACCOUNTS = [
@@ -74,8 +78,8 @@ async function ensureTeamAccounts() {
   }
 }
 
-async function main() {
-  console.log("Clearing all business data from Styletex Kitchens…");
+async function wipeBusinessData() {
+  console.log("SEED_WIPE_DATA=1 set — clearing all business data…");
 
   await prisma.cabinetSpec.deleteMany();
   await prisma.quoteLineItem.deleteMany();
@@ -90,6 +94,19 @@ async function main() {
   await prisma.supplier.deleteMany();
 
   console.log("Database is clean. No demo data was inserted.");
+}
+
+async function main() {
+  if (process.env.SEED_WIPE_DATA === "1") {
+    await wipeBusinessData();
+  } else {
+    console.log(
+      "Skipping business-data wipe (this is the safe default).\n" +
+        "Pass SEED_WIPE_DATA=1 to wipe clients/projects/quotes/materials/\n" +
+        "calendar events instead — only do this against an empty dev\n" +
+        "database, never against live production data."
+    );
+  }
 
   await ensureTeamAccounts();
 }
