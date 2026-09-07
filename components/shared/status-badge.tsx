@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-const PROJECT_STATUS_LABEL: Record<string, string> = {
+export const PROJECT_STATUS_LABEL: Record<string, string> = {
   LEAD: "ליד",
   DESIGN: "תכנון",
   QUOTED: "הצעת מחיר",
@@ -11,7 +11,7 @@ const PROJECT_STATUS_LABEL: Record<string, string> = {
   CANCELLED: "בוטל",
 };
 
-const PROJECT_STATUS_COLOR: Record<string, string> = {
+export const PROJECT_STATUS_COLOR: Record<string, string> = {
   LEAD: "bg-status-lead/15 text-status-lead",
   DESIGN: "bg-status-design/15 text-status-design",
   QUOTED: "bg-status-quoted/15 text-status-quoted",
@@ -20,6 +20,19 @@ const PROJECT_STATUS_COLOR: Record<string, string> = {
   INSTALLATION: "bg-status-installation/15 text-status-installation",
   COMPLETE: "bg-status-complete/15 text-status-complete",
   CANCELLED: "bg-status-cancelled/15 text-status-cancelled",
+};
+
+// Solid swatch tokens (for chart bars/legends, as opposed to the
+// translucent badge backgrounds above).
+export const PROJECT_STATUS_SWATCH: Record<string, string> = {
+  LEAD: "bg-status-lead",
+  DESIGN: "bg-status-design",
+  QUOTED: "bg-status-quoted",
+  APPROVED: "bg-status-approved",
+  PRODUCTION: "bg-status-production",
+  INSTALLATION: "bg-status-installation",
+  COMPLETE: "bg-status-complete",
+  CANCELLED: "bg-status-cancelled",
 };
 
 export function ProjectStatusBadge({ status }: { status: string }) {
@@ -62,12 +75,20 @@ export function QuoteStatusBadge({ status }: { status: string }) {
   );
 }
 
-const STAGE_LABEL: Record<string, string> = {
+export const STAGE_LABEL: Record<string, string> = {
   CUTTING: "חיתוך",
   ASSEMBLY: "הרכבה",
   FINISHING: "גימור",
   QC: "בקרת איכות",
   READY: "מוכן",
+};
+
+export const STAGE_SWATCH: Record<string, string> = {
+  CUTTING: "bg-status-lead",
+  ASSEMBLY: "bg-status-design",
+  FINISHING: "bg-status-quoted",
+  QC: "bg-status-installation",
+  READY: "bg-status-complete",
 };
 
 export function StageBadge({ stage }: { stage: string }) {

@@ -1,21 +1,58 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ProjectStatusBadge } from "@/components/shared/status-badge";
+import {
+  PipelineDistribution,
+  ProductionBreakdown,
+  MonthlyValueChart,
+  PaymentDonut,
+} from "@/components/dashboard/charts";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import type { ProjectStatus, ProductionStage } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
+function buildMonthlyBuckets(
+  projects: { targetDate: Date | null; budget: unknown }[],
+  monthsAhead = 6
+) {
+  const now = new Date();
+  const buckets = Array.from({ length: monthsAhead }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    return {
+      key: `${d.getFullYear()}-${d.getMonth()}`,
+      label: new Intl.DateTimeFormat("he-IL", { month: "short" }).format(d),
+      value: 0,
+    };
+  });
+
+  for (const p of projects) {
+    if (!p.targetDate || !p.budget) continue;
+    const key = `${p.targetDate.getFullYear()}-${p.targetDate.getMonth()}`;
+    const bucket = buckets.find((b) => b.key === key);
+    if (bucket) bucket.value += Number(p.budget);
+  }
+
+  return buckets.map(({ label, value }) => ({ label, value }));
+}
+
 export default async function OverviewPage() {
-  const [projects, clients, quotes, workOrders] = await Promise.all([
+  const [projects, clients, approvedQuotes, openWorkOrders] = await Promise.all([
     prisma.project.findMany({
       include: { client: true },
       orderBy: { createdAt: "desc" },
     }),
     prisma.client.count(),
-    prisma.quote.findMany({ where: { status: "APPROVED" } }),
-    prisma.workOrder.findMany({ where: { stage: { not: "READY" } } }),
+    prisma.quote.findMany({
+      where: { status: "APPROVED" },
+      select: { total: true, paid: true },
+    }),
+    prisma.workOrder.findMany({
+      where: { stage: { not: "READY" } },
+      select: { stage: true },
+    }),
   ]);
 
   const activeProjects = projects.filter(
@@ -25,9 +62,23 @@ export default async function OverviewPage() {
     (sum, p) => sum + Number(p.budget ?? 0),
     0
   );
-  const approvedValue = quotes.reduce((sum, q) => sum + Number(q.total), 0);
+  const approvedValue = approvedQuotes.reduce((sum, q) => sum + Number(q.total), 0);
+  const paidValue = approvedQuotes
+    .filter((q) => q.paid)
+    .reduce((sum, q) => sum + Number(q.total), 0);
 
-  const recentProjects = projects.slice(0, 6);
+  const statusCounts = activeProjects.reduce<Record<string, number>>((acc, p) => {
+    acc[p.status as ProjectStatus] = (acc[p.status as ProjectStatus] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const stageCounts = openWorkOrders.reduce<Record<string, number>>((acc, wo) => {
+    acc[wo.stage as ProductionStage] = (acc[wo.stage as ProductionStage] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const monthlyData = buildMonthlyBuckets(activeProjects);
+  const recentProjects = projects.slice(0, 5);
 
   return (
     <div>
@@ -36,11 +87,55 @@ export default async function OverviewPage() {
         description="תמונת מצב כוללת של הפרויקטים, צבר העבודות והייצור בסטודיו."
       />
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="פרויקטים פעילים" value={String(activeProjects.length)} />
         <StatCard label="לקוחות" value={String(clients)} />
         <StatCard label="שווי צבר עבודות" value={formatCurrency(pipelineValue)} />
-        <StatCard label="בייצור" value={String(workOrders.length)} />
+        <StatCard label="בייצור" value={String(openWorkOrders.length)} />
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>פילוח פרויקטים לפי סטטוס</CardTitle>
+            <CardDescription>התפלגות הפרויקטים הפעילים לאורך תהליך העבודה</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PipelineDistribution counts={statusCounts} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>גביית תשלומים</CardTitle>
+            <CardDescription>מתוך הצעות מחיר מאושרות</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PaymentDonut paid={paidValue} total={approvedValue} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>ערך צבר עבודות לפי חודש</CardTitle>
+            <CardDescription>תקציב פרויקטים פעילים, לפי חודש היעד</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonthlyValueChart data={monthlyData} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>התקדמות ייצור</CardTitle>
+            <CardDescription>הזמנות עבודה פתוחות לפי שלב</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProductionBreakdown counts={stageCounts} />
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -84,10 +179,6 @@ export default async function OverviewPage() {
           )}
         </CardContent>
       </Card>
-
-      <div className="mt-4 text-sm text-muted-foreground">
-        {formatCurrency(approvedValue)} בהצעות מחיר מאושרות הממתינות לייצור.
-      </div>
     </div>
   );
 }
