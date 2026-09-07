@@ -13,12 +13,31 @@ export async function createClient(formData: FormData) {
 
   if (!name) throw new Error("Client name is required");
 
+  // Every new client is created together with its first linked project in
+  // a single write, so clients and projects stay integrated instead of
+  // being two separate, disjointed steps in the workflow.
   const client = await prisma.client.create({
-    data: { name, email, phone, address, notes },
+    data: {
+      name,
+      email,
+      phone,
+      address,
+      notes,
+      projects: {
+        create: {
+          name: `מטבח ${name}`,
+        },
+      },
+    },
+    include: { projects: true },
   });
 
   revalidatePath("/clients");
-  redirect(`/clients/${client.id}`);
+  revalidatePath("/projects");
+  revalidatePath("/");
+
+  const [project] = client.projects;
+  redirect(`/projects/${project.id}`);
 }
 
 export async function updateClient(id: string, formData: FormData) {

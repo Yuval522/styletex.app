@@ -29,6 +29,9 @@ export function NewClientDialog() {
         <DialogHeader>
           <DialogTitle>לקוח חדש</DialogTitle>
         </DialogHeader>
+        <p className="-mt-2 text-sm text-muted-foreground">
+          פרויקט חדש ייווצר ויקושר אוטומטית ללקוח, ותועברו אליו מיד לאחר היצירה.
+        </p>
         <form action={createClient} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="name">שם</Label>
@@ -54,7 +57,7 @@ export function NewClientDialog() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent">
-              צור לקוח
+              צור לקוח ופרויקט
             </Button>
           </div>
         </form>
