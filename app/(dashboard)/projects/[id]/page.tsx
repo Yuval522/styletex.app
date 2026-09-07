@@ -13,6 +13,9 @@ import { QuoteStatusSelect } from "@/components/quotes/quote-status-select";
 import { QuotePdfActions } from "@/components/quotes/quote-pdf-actions";
 import { NewWorkOrderDialog } from "@/components/production/new-work-order-dialog";
 import { StageSelect } from "@/components/production/stage-select";
+import { DeleteButton } from "@/components/shared/delete-button";
+import { deleteProject } from "@/actions/projects";
+import { deleteQuote } from "@/actions/quotes";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +74,11 @@ export default async function ProjectDetailPage({
               }}
             />
             <ProjectStatusSelect projectId={project.id} status={project.status} />
+            <DeleteButton
+              onDelete={deleteProject.bind(null, project.id)}
+              confirmMessage={`למחוק את הפרויקט "${project.name}"? פעולה זו תמחק גם את החדרים, המפרטים, הצעות המחיר וההזמנות המשויכות ואינה הפיכה.`}
+              redirectTo="/projects"
+            />
           </div>
         }
       />
@@ -153,6 +161,10 @@ export default async function ProjectDetailPage({
                           projectId={project.id}
                           quoteId={quote.id}
                           status={quote.status}
+                        />
+                        <DeleteButton
+                          onDelete={deleteQuote.bind(null, quote.id)}
+                          confirmMessage="למחוק הצעת מחיר זו? הפעולה אינה הפיכה."
                         />
                       </div>
                     </div>

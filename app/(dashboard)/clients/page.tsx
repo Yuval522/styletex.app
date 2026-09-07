@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
 import { NewClientDialog } from "@/components/clients/new-client-dialog";
 import { EditClientDialog } from "@/components/clients/edit-client-dialog";
+import { DeleteButton } from "@/components/shared/delete-button";
+import { deleteClient } from "@/actions/clients";
 import {
   Table,
   TableBody,
@@ -41,7 +43,7 @@ export default async function ClientsPage() {
               <TableHead>פרטי קשר</TableHead>
               <TableHead>כתובת</TableHead>
               <TableHead>פרויקטים</TableHead>
-              <TableHead className="w-10" />
+              <TableHead className="w-20" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,7 +71,13 @@ export default async function ClientsPage() {
                 </TableCell>
                 <TableCell>{client._count.projects}</TableCell>
                 <TableCell>
-                  <EditClientDialog client={client} />
+                  <div className="flex items-center gap-1">
+                    <EditClientDialog client={client} />
+                    <DeleteButton
+                      onDelete={deleteClient.bind(null, client.id)}
+                      confirmMessage={`למחוק את הלקוח "${client.name}"? פעולה זו תמחק גם את כל הפרויקטים, ההצעות והאירועים המשויכים אליו ואינה הפיכה.`}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

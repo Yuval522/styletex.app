@@ -36,3 +36,13 @@ export async function updateClient(id: string, formData: FormData) {
   revalidatePath(`/clients/${id}`);
   revalidatePath("/clients");
 }
+
+export async function deleteClient(id: string) {
+  await prisma.client.delete({ where: { id } });
+
+  revalidatePath("/clients");
+  revalidatePath("/projects");
+  revalidatePath("/quotes");
+  revalidatePath("/calendar");
+  revalidatePath("/");
+}

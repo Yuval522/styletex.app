@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const nav = [
+export const NAV_ITEMS = [
   { href: "/", label: "סקירה כללית", icon: LayoutDashboard },
   { href: "/clients", label: "לקוחות", icon: Users },
   { href: "/projects", label: "פרויקטים", icon: FolderKanban },
@@ -24,13 +24,14 @@ const nav = [
   { href: "/materials", label: "חומרים", icon: Boxes },
 ];
 
-export function Sidebar() {
+/** Nav content shared by the fixed desktop sidebar and the mobile drawer. */
+export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-e border-border bg-surface">
+    <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background font-display text-sm">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background font-display text-sm">
           S
         </div>
         <div className="leading-tight">
@@ -41,8 +42,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3">
-        {nav.map((item) => {
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
+        {NAV_ITEMS.map((item) => {
           const active =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -50,14 +51,15 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors sm:py-2",
                 active
                   ? "bg-surface-muted text-foreground"
                   : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
               )}
             >
-              <Icon className="size-4" />
+              <Icon className="size-4 shrink-0" />
               {item.label}
             </Link>
           );
@@ -67,12 +69,22 @@ export function Sidebar() {
       <div className="border-t border-border p-3">
         <Link
           href="/settings"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
+          onClick={onNavigate}
+          className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground sm:py-2"
         >
-          <Settings className="size-4" />
+          <Settings className="size-4 shrink-0" />
           הגדרות
         </Link>
       </div>
+    </div>
+  );
+}
+
+/** Fixed rail shown on large screens only; mobile uses MobileNav instead. */
+export function Sidebar() {
+  return (
+    <aside className="hidden h-screen w-64 shrink-0 flex-col border-e border-border bg-surface lg:flex">
+      <SidebarContent />
     </aside>
   );
 }

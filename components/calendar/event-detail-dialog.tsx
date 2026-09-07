@@ -58,6 +58,9 @@ export function EventDetailDialog({
   }
 
   async function handleDelete() {
+    if (typeof window !== "undefined" && !window.confirm("למחוק אירוע זה? הפעולה אינה הפיכה.")) {
+      return;
+    }
     setPending(true);
     try {
       await deleteCalendarEvent(event!.id);
@@ -86,7 +89,7 @@ export function EventDetailDialog({
             <Input id="title" name="title" required defaultValue={event.title} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>סוג אירוע</Label>
               <input type="hidden" name="type" value={type} />
@@ -121,7 +124,7 @@ export function EventDetailDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="startAt">תאריך התחלה</Label>
               <DateInput

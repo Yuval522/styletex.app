@@ -85,7 +85,7 @@ export function NewEventDialog({
             <Input id="title" name="title" required placeholder="מדידה בדירת כהן" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>סוג אירוע</Label>
               <input type="hidden" name="type" value={type} />
@@ -120,7 +120,7 @@ export function NewEventDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="startAt">תאריך התחלה</Label>
               <DateInput

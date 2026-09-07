@@ -5,6 +5,8 @@ import { NewProjectDialog } from "@/components/projects/new-project-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProjectStatusBadge } from "@/components/shared/status-badge";
 import { ProjectStepper, getProjectStages } from "@/components/projects/project-stepper";
+import { DeleteButton } from "@/components/shared/delete-button";
+import { deleteProject } from "@/actions/projects";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -93,6 +95,10 @@ export default async function ProjectsPage() {
                         <p>{project.targetDate ? formatDate(project.targetDate) : "—"}</p>
                       </div>
                       <ProjectStatusBadge status={project.status} />
+                      <DeleteButton
+                        onDelete={deleteProject.bind(null, project.id)}
+                        confirmMessage={`למחוק את הפרויקט "${project.name}"? פעולה זו תמחק גם את החדרים, המפרטים, הצעות המחיר וההזמנות המשויכות ואינה הפיכה.`}
+                      />
                     </div>
                   </div>
 

@@ -55,6 +55,20 @@ export async function updateMaterial(id: string, formData: FormData) {
   revalidatePath("/materials");
 }
 
+export async function deleteMaterial(id: string) {
+  try {
+    await prisma.material.delete({ where: { id } });
+  } catch (e: unknown) {
+    const code = (e as { code?: string })?.code;
+    if (code === "P2003" || code === "P2014") {
+      throw new Error("לא ניתן למחוק חומר המשויך למפרטי מוצר קיימים.");
+    }
+    throw e;
+  }
+
+  revalidatePath("/materials");
+}
+
 export async function createSupplier(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const contact = String(formData.get("contact") ?? "").trim() || null;

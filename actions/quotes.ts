@@ -130,3 +130,14 @@ export async function updateQuotePaid(quoteId: string, paid: boolean) {
   revalidatePath("/projects");
   revalidatePath("/quotes");
 }
+
+export async function deleteQuote(quoteId: string) {
+  const quote = await prisma.quote.delete({
+    where: { id: quoteId },
+    select: { projectId: true },
+  });
+
+  revalidatePath(`/projects/${quote.projectId}`);
+  revalidatePath("/projects");
+  revalidatePath("/quotes");
+}

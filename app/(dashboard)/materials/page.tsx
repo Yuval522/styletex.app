@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { NewMaterialDialog } from "@/components/materials/new-material-dialog";
 import { NewSupplierDialog } from "@/components/materials/new-supplier-dialog";
 import { EditMaterialDialog } from "@/components/materials/edit-material-dialog";
+import { DeleteButton } from "@/components/shared/delete-button";
+import { deleteMaterial } from "@/actions/materials";
 import {
   Table,
   TableBody,
@@ -58,7 +60,7 @@ export default async function MaterialsPage() {
               <TableHead>עלות ליחידה</TableHead>
               <TableHead>מלאי</TableHead>
               <TableHead>ספק</TableHead>
-              <TableHead className="w-10" />
+              <TableHead className="w-20" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -91,19 +93,25 @@ export default async function MaterialsPage() {
                     {m.supplier?.name ?? "—"}
                   </TableCell>
                   <TableCell>
-                    <EditMaterialDialog
-                      material={{
-                        id: m.id,
-                        name: m.name,
-                        type: m.type,
-                        unitCost: Number(m.unitCost),
-                        unit: m.unit,
-                        stockQty: m.stockQty != null ? Number(m.stockQty) : null,
-                        reorderLevel: m.reorderLevel != null ? Number(m.reorderLevel) : null,
-                        supplierId: m.supplierId,
-                      }}
-                      suppliers={suppliers}
-                    />
+                    <div className="flex items-center gap-1">
+                      <EditMaterialDialog
+                        material={{
+                          id: m.id,
+                          name: m.name,
+                          type: m.type,
+                          unitCost: Number(m.unitCost),
+                          unit: m.unit,
+                          stockQty: m.stockQty != null ? Number(m.stockQty) : null,
+                          reorderLevel: m.reorderLevel != null ? Number(m.reorderLevel) : null,
+                          supplierId: m.supplierId,
+                        }}
+                        suppliers={suppliers}
+                      />
+                      <DeleteButton
+                        onDelete={deleteMaterial.bind(null, m.id)}
+                        confirmMessage={`למחוק את החומר "${m.name}"?`}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               );

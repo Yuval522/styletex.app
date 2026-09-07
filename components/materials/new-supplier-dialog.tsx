@@ -37,7 +37,7 @@ export function NewSupplierDialog() {
             <Label htmlFor="contact">איש קשר</Label>
             <Input id="contact" name="contact" placeholder="דנה כהן" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="email">אימייל</Label>
               <Input id="email" name="email" type="email" />

@@ -5,6 +5,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProjectStatusBadge } from "@/components/shared/status-badge";
 import { NewProjectDialog } from "@/components/projects/new-project-dialog";
+import { DeleteButton } from "@/components/shared/delete-button";
+import { deleteClient } from "@/actions/clients";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +32,16 @@ export default async function ClientDetailPage({
         description={[client.email, client.phone, client.address]
           .filter(Boolean)
           .join(" · ") || "אין פרטי קשר במערכת"}
-        action={<NewProjectDialog clients={[client]} defaultClientId={client.id} />}
+        action={
+          <div className="flex items-center gap-2">
+            <NewProjectDialog clients={[client]} defaultClientId={client.id} />
+            <DeleteButton
+              onDelete={deleteClient.bind(null, client.id)}
+              confirmMessage={`למחוק את הלקוח "${client.name}"? פעולה זו תמחק גם את כל הפרויקטים, ההצעות והאירועים המשויכים אליו ואינה הפיכה.`}
+              redirectTo="/clients"
+            />
+          </div>
+        }
       />
 
       {client.notes && (

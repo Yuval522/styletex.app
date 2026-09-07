@@ -12,7 +12,7 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-8 flex items-start justify-between gap-4", className)}>
+    <div className={cn("mb-6 flex flex-wrap items-start justify-between gap-4 sm:mb-8", className)}>
       <div>
         <h1 className="font-display text-2xl text-foreground">{title}</h1>
         {description && (

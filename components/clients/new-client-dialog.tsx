@@ -34,7 +34,7 @@ export function NewClientDialog() {
             <Label htmlFor="name">שם</Label>
             <Input id="name" name="name" required placeholder="ישראל ישראלי" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="email">אימייל</Label>
               <Input id="email" name="email" type="email" placeholder="israel@email.com" />

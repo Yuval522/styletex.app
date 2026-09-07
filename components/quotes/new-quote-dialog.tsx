@@ -48,16 +48,16 @@ export function NewQuoteDialog({ projectId }: { projectId: string }) {
         <form action={action} className="space-y-4">
           <div className="space-y-2">
             {items.map((item) => (
-              <div key={item.id} className="flex items-end gap-2">
-                <div className="flex-1 space-y-1.5">
+              <div key={item.id} className="flex flex-wrap items-end gap-2 sm:flex-nowrap">
+                <div className="w-full space-y-1.5 sm:w-auto sm:flex-1">
                   {item.id === items[0].id && <Label>תיאור</Label>}
                   <Input name="description" defaultValue={item.description} placeholder="ארון אי מותאם אישית" />
                 </div>
-                <div className="w-20 space-y-1.5">
+                <div className="w-[calc(50%-2.25rem)] space-y-1.5 sm:w-20">
                   {item.id === items[0].id && <Label>כמות</Label>}
                   <Input name="quantity" type="number" step="0.1" defaultValue={item.quantity} />
                 </div>
-                <div className="w-28 space-y-1.5">
+                <div className="w-[calc(50%-2.25rem)] space-y-1.5 sm:w-28">
                   {item.id === items[0].id && <Label>מחיר יחידה</Label>}
                   <Input name="unitPrice" type="number" step="0.01" defaultValue={item.unitPrice} />
                 </div>
@@ -78,7 +78,7 @@ export function NewQuoteDialog({ projectId }: { projectId: string }) {
             <Plus /> הוסף שורה
           </Button>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="tax">מע&quot;מ</Label>
               <Input id="tax" name="tax" type="number" step="0.01" defaultValue="0" />

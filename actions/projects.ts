@@ -62,3 +62,14 @@ export async function updateProjectStatus(id: string, status: ProjectStatus) {
   revalidatePath("/production");
   return project;
 }
+
+export async function deleteProject(id: string) {
+  const project = await prisma.project.delete({ where: { id } });
+
+  revalidatePath("/projects");
+  revalidatePath(`/clients/${project.clientId}`);
+  revalidatePath("/quotes");
+  revalidatePath("/calendar");
+  revalidatePath("/production");
+  revalidatePath("/");
+}

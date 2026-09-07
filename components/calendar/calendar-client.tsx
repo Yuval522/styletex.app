@@ -188,34 +188,36 @@ function MonthGrid({ current, ...handlers }: { current: Date } & GridHandlers) {
   const days = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
-      <div className="grid grid-cols-7 border-b border-border bg-surface-muted">
-        {WEEKDAY_LABELS.map((label) => (
-          <div
-            key={label}
-            className="border-e border-border p-2 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground last:border-e-0"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7">
-        {days.map((day) => (
-          <DayCell
-            key={day.toISOString()}
-            day={day}
-            muted={day.getMonth() !== current.getMonth()}
-            events={handlers.eventsOn(day)}
-            projects={handlers.projects}
-            isDragOver={handlers.dragOverDay === day.toDateString()}
-            onDragOverDay={handlers.onDragOverDay}
-            onDragLeaveDay={handlers.onDragLeaveDay}
-            onDropDay={handlers.onDropDay}
-            onSelectEvent={handlers.onSelectEvent}
-            onDragStartEvent={handlers.onDragStartEvent}
-            onDragEndEvent={handlers.onDragEndEvent}
-          />
-        ))}
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="min-w-[640px]">
+        <div className="grid grid-cols-7 border-b border-border bg-surface-muted">
+          {WEEKDAY_LABELS.map((label) => (
+            <div
+              key={label}
+              className="border-e border-border p-2 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground last:border-e-0"
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {days.map((day) => (
+            <DayCell
+              key={day.toISOString()}
+              day={day}
+              muted={day.getMonth() !== current.getMonth()}
+              events={handlers.eventsOn(day)}
+              projects={handlers.projects}
+              isDragOver={handlers.dragOverDay === day.toDateString()}
+              onDragOverDay={handlers.onDragOverDay}
+              onDragLeaveDay={handlers.onDragLeaveDay}
+              onDropDay={handlers.onDropDay}
+              onSelectEvent={handlers.onSelectEvent}
+              onDragStartEvent={handlers.onDragStartEvent}
+              onDragEndEvent={handlers.onDragEndEvent}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -226,43 +228,45 @@ function WeekGrid({ current, ...handlers }: { current: Date } & GridHandlers) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
-      <div className="grid grid-cols-7 border-b border-border bg-surface-muted">
-        {days.map((day) => (
-          <div
-            key={day.toISOString()}
-            className="border-e border-border p-2 text-center last:border-e-0"
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {WEEKDAY_LABELS[day.getDay()]}
-            </p>
-            <p
-              className={cn(
-                "mt-0.5 text-sm font-medium",
-                isSameDay(day, startOfDay(new Date())) ? "text-accent" : "text-foreground"
-              )}
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="min-w-[640px]">
+        <div className="grid grid-cols-7 border-b border-border bg-surface-muted">
+          {days.map((day) => (
+            <div
+              key={day.toISOString()}
+              className="border-e border-border p-2 text-center last:border-e-0"
             >
-              {day.getDate()}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7">
-        {days.map((day) => (
-          <DayCell
-            key={day.toISOString()}
-            day={day}
-            events={handlers.eventsOn(day)}
-            projects={handlers.projects}
-            isDragOver={handlers.dragOverDay === day.toDateString()}
-            onDragOverDay={handlers.onDragOverDay}
-            onDragLeaveDay={handlers.onDragLeaveDay}
-            onDropDay={handlers.onDropDay}
-            onSelectEvent={handlers.onSelectEvent}
-            onDragStartEvent={handlers.onDragStartEvent}
-            onDragEndEvent={handlers.onDragEndEvent}
-          />
-        ))}
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {WEEKDAY_LABELS[day.getDay()]}
+              </p>
+              <p
+                className={cn(
+                  "mt-0.5 text-sm font-medium",
+                  isSameDay(day, startOfDay(new Date())) ? "text-accent" : "text-foreground"
+                )}
+              >
+                {day.getDate()}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7">
+          {days.map((day) => (
+            <DayCell
+              key={day.toISOString()}
+              day={day}
+              events={handlers.eventsOn(day)}
+              projects={handlers.projects}
+              isDragOver={handlers.dragOverDay === day.toDateString()}
+              onDragOverDay={handlers.onDragOverDay}
+              onDragLeaveDay={handlers.onDragLeaveDay}
+              onDropDay={handlers.onDropDay}
+              onSelectEvent={handlers.onSelectEvent}
+              onDragStartEvent={handlers.onDragStartEvent}
+              onDragEndEvent={handlers.onDragEndEvent}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

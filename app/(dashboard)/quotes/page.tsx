@@ -13,6 +13,8 @@ import { QuoteStatusBadge } from "@/components/shared/status-badge";
 import { QuoteStatusSelect } from "@/components/quotes/quote-status-select";
 import { QuotePdfActions } from "@/components/quotes/quote-pdf-actions";
 import { PaymentToggle } from "@/components/quotes/payment-toggle";
+import { DeleteButton } from "@/components/shared/delete-button";
+import { deleteQuote } from "@/actions/quotes";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -109,12 +111,18 @@ export default async function QuotesPage() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Link
-                    href={`/projects/${quote.project.id}`}
-                    className="text-sm text-accent hover:underline"
-                  >
-                    צפייה בפרויקט
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/projects/${quote.project.id}`}
+                      className="whitespace-nowrap text-sm text-accent hover:underline"
+                    >
+                      צפייה בפרויקט
+                    </Link>
+                    <DeleteButton
+                      onDelete={deleteQuote.bind(null, quote.id)}
+                      confirmMessage="למחוק הצעת מחיר זו? הפעולה אינה הפיכה."
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
