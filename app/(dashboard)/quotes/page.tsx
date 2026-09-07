@@ -18,9 +18,22 @@ export const dynamic = "force-dynamic";
 
 export default async function QuotesPage() {
   const quotes = await prisma.quote.findMany({
-    omit: { pdfData: true },
-    include: {
-      project: { include: { client: true } },
+    select: {
+      id: true,
+      version: true,
+      status: true,
+      subtotal: true,
+      tax: true,
+      total: true,
+      createdAt: true,
+      pdfFileName: true,
+      project: {
+        select: {
+          id: true,
+          name: true,
+          client: { select: { id: true, name: true } },
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

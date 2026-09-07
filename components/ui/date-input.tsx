@@ -11,6 +11,11 @@ import { cn } from "@/lib/utils";
  * keep working unchanged. A transparent native date input sits over the
  * calendar icon so clicking it opens the browser's own date picker,
  * which stays in sync with the typed text.
+ *
+ * The visible text is rendered LTR (digits read left-to-right), so inside
+ * an RTL page the calendar icon sits on the "start" side (the right edge
+ * under RTL) — the opposite edge from where the digits begin — so the two
+ * never overlap.
  */
 
 function isoToDisplay(iso: string) {
@@ -72,7 +77,7 @@ export function DateInput({
         placeholder={placeholder}
         required={required}
         autoComplete="off"
-        className="flex h-9 w-full rounded-md border border-border bg-surface px-3 py-1 pe-9 text-start text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-9 w-full items-center rounded-md border border-border bg-surface ps-9 pe-3 py-1 text-start text-[0.9rem] leading-9 text-foreground shadow-sm transition-colors placeholder:text-muted-foreground placeholder:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
         value={display}
         onChange={(e) => {
           const formatted = formatTyping(e.target.value);
@@ -80,12 +85,12 @@ export function DateInput({
           setIso(displayToIso(formatted));
         }}
       />
-      <CalendarDays className="pointer-events-none absolute end-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <CalendarDays className="pointer-events-none absolute start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <input
         type="date"
         tabIndex={-1}
         aria-label="בחר תאריך מלוח שנה"
-        className="absolute end-0 top-0 h-full w-9 cursor-pointer opacity-0"
+        className="absolute start-0 top-0 h-full w-9 cursor-pointer opacity-0"
         value={iso}
         onChange={(e) => setFromIso(e.target.value)}
       />
