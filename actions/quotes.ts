@@ -118,3 +118,15 @@ export async function updateQuoteStatus(
   revalidatePath("/projects");
   revalidatePath("/quotes");
 }
+
+export async function updateQuotePaid(quoteId: string, paid: boolean) {
+  const quote = await prisma.quote.update({
+    where: { id: quoteId },
+    data: { paid, paidAt: paid ? new Date() : null },
+    select: { projectId: true },
+  });
+
+  revalidatePath(`/projects/${quote.projectId}`);
+  revalidatePath("/projects");
+  revalidatePath("/quotes");
+}

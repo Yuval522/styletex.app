@@ -12,6 +12,7 @@ import {
 import { QuoteStatusBadge } from "@/components/shared/status-badge";
 import { QuoteStatusSelect } from "@/components/quotes/quote-status-select";
 import { QuotePdfActions } from "@/components/quotes/quote-pdf-actions";
+import { PaymentToggle } from "@/components/quotes/payment-toggle";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,8 @@ export default async function QuotesPage() {
       total: true,
       createdAt: true,
       pdfFileName: true,
+      paid: true,
+      paidAt: true,
       project: {
         select: {
           id: true,
@@ -59,6 +62,7 @@ export default async function QuotesPage() {
               <TableHead>סכום</TableHead>
               <TableHead>תאריך</TableHead>
               <TableHead>קובץ</TableHead>
+              <TableHead>תשלום</TableHead>
               <TableHead>פעולות</TableHead>
             </TableRow>
           </TableHeader>
@@ -94,6 +98,15 @@ export default async function QuotesPage() {
                 </TableCell>
                 <TableCell>
                   <QuotePdfActions quoteId={quote.id} fileName={quote.pdfFileName} />
+                </TableCell>
+                <TableCell>
+                  {quote.status === "APPROVED" ? (
+                    <PaymentToggle quoteId={quote.id} paid={quote.paid} />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      ממתין לאישור
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Link
