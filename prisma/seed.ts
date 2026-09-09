@@ -113,8 +113,14 @@ async function main() {
 
 main()
   .catch((e) => {
+    // This script now also runs automatically as part of `npm run build`
+    // (see package.json), so a hiccup here must NOT fail the whole
+    // deployment — the rest of the app still needs to ship. Log loudly
+    // and exit 0; re-run `npm run db:seed` manually afterwards if this
+    // ever prints an error. (The /setup page is also there as a backup
+    // way to create the initial accounts if this step ever misfires.)
+    console.error("\n⚠️  prisma/seed.ts failed — the deploy will continue anyway:");
     console.error(e);
-    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
