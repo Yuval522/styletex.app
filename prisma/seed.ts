@@ -13,11 +13,13 @@ const prisma = new PrismaClient();
  * data.
  *
  * Login accounts are NEVER deleted by this script. On first run (or
- * whenever an account doesn't exist yet), a strong random password is
- * generated and printed once to the terminal — it is never stored in
- * this file or in git. Save it immediately; it cannot be recovered
- * afterwards (only reset, by deleting the row and re-running this
- * script).
+ * whenever an account doesn't exist yet), it creates a placeholder row
+ * with a random password nobody knows (passwordSet: false) and prints
+ * that password once, purely as a fallback. The real, intended way in is
+ * the "הרשמה" (Sign Up) tab on /login — picking your name there and
+ * setting your own password "claims" this exact placeholder row (see
+ * actions/auth.ts's registerAccount) instead of failing with "account
+ * already exists".
  *
  * Wiping ALL business data (clients, projects, quotes, materials,
  * calendar events) is a separate, explicit, opt-in action — it is NOT
@@ -47,29 +49,29 @@ async function ensureTeamAccounts() {
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 12);
     await prisma.user.create({
-      data: { name: account.name, email, passwordHash },
+      data: { name: account.name, email, passwordHash, passwordSet: false },
     });
     generated.push({ name: account.name, email, password });
-    console.log(`  + Created account for ${account.name} <${email}>.`);
+    console.log(`  + Created placeholder account for ${account.name} <${email}>.`);
   }
 
   if (generated.length > 0) {
     console.log(
-      "\n=================== SAVE THESE PASSWORDS NOW ==================="
+      "\n=================== FALLBACK PASSWORDS (see note below) ==================="
     );
     for (const { name, email, password } of generated) {
       console.log(`  ${name} — ${email}`);
       console.log(`    password: ${password}`);
     }
     console.log(
-      "==================================================================="
+      "=============================================================================="
     );
     console.log(
-      "These passwords are shown only once and are not stored anywhere in\n" +
-        "the codebase. Share them securely with the account owner. Anyone\n" +
-        "can change their own password later once a change-password screen\n" +
-        "is added, or you can rotate it by deleting the User row and\n" +
-        "re-running `npm run db:seed`.\n"
+      "PREFERRED: open the app, go to the \"הרשמה\" (Sign Up) tab on /login,\n" +
+        "pick your name, and set your own password — that's simpler than\n" +
+        "using the random password above and works exactly once per person.\n" +
+        "The password above is only a fallback if you'd rather log in with\n" +
+        "it directly; it is shown only here, never stored in the codebase.\n"
     );
   }
 }

@@ -263,6 +263,13 @@ model User {
   name         String
   email        String   @unique
   passwordHash String
+  // false = this row is a placeholder (created by the seed script, with
+  // a password nobody actually knows) that is still waiting to be
+  // claimed via the sign-up tab. Once the real owner signs up, this
+  // flips to true and the email can never be "signed up" again — only
+  // logged into. Defaulting to false means every row is claimable until
+  // someone explicitly proves ownership by setting their own password.
+  passwordSet  Boolean  @default(false)
   role         UserRole @default(ADMIN)
 
   createdAt DateTime @default(now())
