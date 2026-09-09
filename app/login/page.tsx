@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { LoginForm } from "@/components/auth/login-form";
+import { AuthTabs } from "@/components/auth/auth-tabs";
 
 export const metadata = {
   title: "התחברות · Styletex Kitchens",
@@ -9,14 +9,15 @@ export const metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ setup?: string }>;
+  searchParams: Promise<{ setup?: string; tab?: string }>;
 }) {
   const session = await auth();
   if (session?.user) {
     redirect("/");
   }
 
-  const { setup } = await searchParams;
+  const { setup, tab } = await searchParams;
+  const defaultTab = tab === "signup" ? "signup" : "login";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
@@ -40,12 +41,12 @@ export default async function LoginPage({
             </p>
           )}
           <h1 className="mb-1 text-lg font-semibold text-foreground">
-            התחברות למערכת
+            ברוכים הבאים
           </h1>
           <p className="mb-6 text-sm text-muted-foreground">
-            הזינו את פרטי ההתחברות שלכם כדי להמשיך לניהול הפרויקטים.
+            התחברו עם פרטי הגישה שלכם, או הירשמו בפעם הראשונה.
           </p>
-          <LoginForm />
+          <AuthTabs defaultTab={defaultTab} />
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">

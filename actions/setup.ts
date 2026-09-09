@@ -1,5 +1,10 @@
 "use server";
 
+// SUPERSEDED: registration now happens via actions/auth.ts's
+// registerAccount(), used by the "הרשמה" tab on the main /login page.
+// This file is unused (app/setup/page.tsx just redirects to
+// /login?tab=signup now) and kept only for reference.
+
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";

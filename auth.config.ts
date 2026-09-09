@@ -8,10 +8,9 @@ import type { NextAuthConfig } from "next-auth";
  * ever used from Server Components / Route Handlers / Server Actions.
  */
 
-// Public routes reachable without a session. /setup is the one-time
-// bootstrap page for creating the first login accounts — it self-locks
-// (see app/setup/page.tsx + actions/setup.ts) once accounts exist, so it
-// is safe to leave reachable here permanently.
+// Public routes reachable without a session. /login now hosts both
+// sign-in and sign-up (as tabs) — see components/auth/auth-tabs.tsx.
+// /setup is a legacy redirect straight into the sign-up tab.
 const PUBLIC_PATHS = ["/login", "/setup"];
 
 export const authConfig: NextAuthConfig = {

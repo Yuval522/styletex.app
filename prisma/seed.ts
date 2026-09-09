@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { TEAM_ACCOUNTS } from "../lib/team-accounts";
 
 const prisma = new PrismaClient();
 
@@ -25,11 +26,6 @@ const prisma = new PrismaClient();
  *
  *   SEED_WIPE_DATA=1 npm run db:seed
  */
-
-const TEAM_ACCOUNTS = [
-  { name: "Yuval", email: "yuvalro123@gmail.com" },
-  { name: "Itamar", email: "Itamarknaan@gmail.com" },
-];
 
 function generatePassword(): string {
   // 16 random bytes -> base64url, trimmed to a readable 20-char secret.
