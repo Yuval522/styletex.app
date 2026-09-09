@@ -21,7 +21,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email } });
+        let user;
+        try {
+          user = await prisma.user.findUnique({ where: { email } });
+        } catch (error) {
+          // Surfaces to the browser as NextAuth's generic "server
+          // configuration" error either way — this makes the REAL cause
+          // (almost always DATABASE_URL missing/wrong on this
+          // environment) unambiguous in Vercel's runtime logs instead of
+          // hidden behind that generic message.
+          console.error(
+            "[auth] authorize(): failed to query the database — check DATABASE_URL for this environment.",
+            error
+          );
+          throw error;
+        }
         if (!user) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);
