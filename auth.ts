@@ -14,38 +14,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "סיסמה", type: "password" },
       },
       async authorize(credentials) {
-        const email = String(credentials?.email ?? "")
-          .trim()
-          .toLowerCase();
-        const password = String(credentials?.password ?? "");
+        // Cheap, value-free sanity check: if this ever logs "MISSING",
+        // the env var wasn't actually visible to THIS running function —
+        // typically because it was added after this instance was already
+        // running (Vercel only picks up new/changed env vars on the next
+        // build+deploy) or was scoped to the wrong environment
+        // (Production vs Preview vs Development) in the dashboard.
+        console.log(
+          `[auth] authorize(): AUTH_SECRET is ${
+            process.env.AUTH_SECRET ? "present" : "MISSING"
+          }, DATABASE_URL is ${process.env.DATABASE_URL ? "present" : "MISSING"}.`
+        );
 
-        if (!email || !password) return null;
-
-        let user;
         try {
-          user = await prisma.user.findUnique({ where: { email } });
+          const email = String(credentials?.email ?? "")
+            .trim()
+            .toLowerCase();
+          const password = String(credentials?.password ?? "");
+
+          if (!email || !password) return null;
+
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user) return null;
+
+          const valid = await bcrypt.compare(password, user.passwordHash);
+          if (!valid) return null;
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
         } catch (error) {
-          // Surfaces to the browser as NextAuth's generic "server
-          // configuration" error either way — this makes the REAL cause
-          // (almost always DATABASE_URL missing/wrong on this
-          // environment) unambiguous in Vercel's runtime logs instead of
-          // hidden behind that generic message.
-          console.error(
-            "[auth] authorize(): failed to query the database — check DATABASE_URL for this environment.",
-            error
-          );
+          // Any throw here surfaces to the browser as NextAuth's generic
+          // "server configuration" error regardless of cause — logging
+          // the full error is the only way to see what actually failed
+          // (DB connection, bcrypt, etc.) instead of that generic message.
+          console.error("[auth] authorize(): unexpected error —", error);
           throw error;
         }
-        if (!user) return null;
-
-        const valid = await bcrypt.compare(password, user.passwordHash);
-        if (!valid) return null;
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
       },
     }),
   ],
