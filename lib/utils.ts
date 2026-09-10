@@ -7,9 +7,13 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(value: number | string | null | undefined) {
   const num = typeof value === "string" ? parseFloat(value) : value ?? 0;
+  // The business operates exclusively in Israeli New Shekels — ILS (₪),
+  // never USD ($). This is the one shared formatter used for every amount
+  // across the app (budgets, quotes, invoices, line items, dashboard
+  // totals), so fixing it here fixes it everywhere.
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
-    currency: "USD",
+    currency: "ILS",
     maximumFractionDigits: 0,
   }).format(num);
 }
