@@ -11,7 +11,7 @@ export async function createClient(formData: FormData) {
   const address = String(formData.get("address") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  if (!name) throw new Error("Client name is required");
+  if (!name) throw new Error("שם הלקוח הוא שדה חובה");
 
   // Every new client is created together with its first linked project in
   // a single write, so clients and projects stay integrated instead of

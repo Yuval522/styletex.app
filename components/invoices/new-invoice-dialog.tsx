@@ -135,7 +135,10 @@ export function NewInvoiceDialog({
   }
 
   async function handleSubmit(formData: FormData) {
-    if (!selectedProjectId) return;
+    if (!selectedProjectId) {
+      setSubmitError("יש לבחור פרויקט לפני יצירת החשבונית");
+      return;
+    }
     setPending(true);
     setSubmitError(null);
     try {
@@ -176,8 +179,16 @@ export function NewInvoiceDialog({
         <form action={handleSubmit} className="space-y-4">
           {needsProjectPicker && (
             <div className="space-y-1.5">
-              <Label>פרויקט</Label>
-              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+              <Label>
+                פרויקט <span className="text-status-cancelled">*</span>
+              </Label>
+              <Select
+                value={selectedProjectId}
+                onValueChange={(value) => {
+                  setSelectedProjectId(value);
+                  setSubmitError(null);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="בחר פרויקט" />
                 </SelectTrigger>
@@ -194,7 +205,7 @@ export function NewInvoiceDialog({
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="invoice-number">מספר חשבונית</Label>
+              <Label htmlFor="invoice-number">מספר חשבונית (לא חובה)</Label>
               <Input
                 id="invoice-number"
                 name="number"
@@ -204,7 +215,7 @@ export function NewInvoiceDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="invoice-due-date">תאריך פירעון</Label>
+              <Label htmlFor="invoice-due-date">תאריך פירעון (לא חובה)</Label>
               <DateInput id="invoice-due-date" name="dueDate" />
             </div>
           </div>
@@ -292,7 +303,7 @@ export function NewInvoiceDialog({
           )}
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="submit" variant="accent" disabled={pending || !selectedProjectId}>
+            <Button type="submit" variant="accent" disabled={pending}>
               {pending ? "יוצר…" : "צור חשבונית"}
             </Button>
           </div>

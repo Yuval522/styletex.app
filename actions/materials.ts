@@ -12,7 +12,7 @@ export async function createMaterial(formData: FormData) {
   const stockQty = String(formData.get("stockQty") ?? "").trim();
   const supplierId = String(formData.get("supplierId") ?? "") || null;
 
-  if (!name || !unit) throw new Error("Name and unit are required");
+  if (!name || !unit) throw new Error("שם ויחידת מידה הם שדות חובה");
 
   await prisma.material.create({
     data: {
@@ -37,7 +37,7 @@ export async function updateMaterial(id: string, formData: FormData) {
   const reorderLevel = String(formData.get("reorderLevel") ?? "").trim();
   const supplierId = String(formData.get("supplierId") ?? "") || null;
 
-  if (!name || !unit) throw new Error("Name and unit are required");
+  if (!name || !unit) throw new Error("שם ויחידת מידה הם שדות חובה");
 
   await prisma.material.update({
     where: { id },
@@ -75,7 +75,7 @@ export async function createSupplier(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim() || null;
   const phone = String(formData.get("phone") ?? "").trim() || null;
 
-  if (!name) throw new Error("Supplier name is required");
+  if (!name) throw new Error("שם הספק הוא שדה חובה");
 
   await prisma.supplier.create({
     data: { name, contact, email, phone },

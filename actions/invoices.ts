@@ -95,7 +95,7 @@ export async function createInvoice(projectId: string, formData: FormData) {
     })
     .filter((item) => item.description);
 
-  if (lineItems.length === 0) throw new Error("At least one line item is required");
+  if (lineItems.length === 0) throw new Error("יש להזין לפחות שורת פריט אחת עם תיאור");
 
   const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
   const tax = Number(taxRaw) || 0;

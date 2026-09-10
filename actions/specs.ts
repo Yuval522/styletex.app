@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 export async function createRoom(projectId: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) throw new Error("Room name is required");
+  if (!name) throw new Error("שם החדר הוא שדה חובה");
 
   await prisma.room.create({
     data: { projectId, name },

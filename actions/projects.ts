@@ -11,7 +11,7 @@ export async function createProject(formData: FormData) {
   const budgetRaw = String(formData.get("budget") ?? "").trim();
   const targetDateRaw = String(formData.get("targetDate") ?? "").trim();
 
-  if (!clientId || !name) throw new Error("Client and project name are required");
+  if (!clientId || !name) throw new Error("יש לבחור לקוח ולהזין שם פרויקט");
 
   const project = await prisma.project.create({
     data: {
@@ -34,7 +34,7 @@ export async function updateProject(id: string, formData: FormData) {
   const startDateRaw = String(formData.get("startDate") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  if (!name) throw new Error("Project name is required");
+  if (!name) throw new Error("שם הפרויקט הוא שדה חובה");
 
   const project = await prisma.project.update({
     where: { id },
