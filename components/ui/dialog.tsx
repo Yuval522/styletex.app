@@ -39,7 +39,7 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute end-4 top-4 rounded-sm opacity-60 transition-opacity hover:opacity-100 focus:outline-none">
+        <DialogPrimitive.Close className="absolute end-2 top-2 flex size-10 items-center justify-center rounded-md opacity-60 transition-opacity hover:bg-surface-muted hover:opacity-100 focus:outline-none">
           <X className="size-4" />
           <span className="sr-only">סגור</span>
         </DialogPrimitive.Close>

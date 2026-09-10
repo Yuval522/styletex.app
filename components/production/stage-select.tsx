@@ -38,7 +38,7 @@ export function StageSelect({
         })
       }
     >
-      <SelectTrigger className="h-8 w-[140px] text-xs" disabled={isPending}>
+      <SelectTrigger className="h-9 w-[140px] text-xs" disabled={isPending}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

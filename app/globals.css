@@ -59,6 +59,16 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
+html,
+body {
+  /* Safety net: every genuinely wide element in this app (tables, the
+     calendar grid, the production kanban) already scrolls inside its own
+     overflow-x-auto wrapper, so the page itself should never need to
+     scroll sideways — this just guarantees a stray element can't force
+     the whole page to pan horizontally on a phone. */
+  overflow-x: hidden;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

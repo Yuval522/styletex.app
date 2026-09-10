@@ -51,7 +51,7 @@ export function ProjectStatusSelect({
         })
       }
     >
-      <SelectTrigger className="h-8 w-[150px] text-xs" disabled={isPending}>
+      <SelectTrigger className="h-9 w-[150px] text-xs" disabled={isPending}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

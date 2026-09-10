@@ -40,7 +40,7 @@ export function QuoteStatusSelect({
         })
       }
     >
-      <SelectTrigger className="h-8 w-[120px] text-xs" disabled={isPending}>
+      <SelectTrigger className="h-9 w-[120px] text-xs" disabled={isPending}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

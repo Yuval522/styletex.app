@@ -17,10 +17,14 @@ const buttonVariants = cva(
         destructive: "bg-status-cancelled text-white hover:bg-status-cancelled/90",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-6",
-        icon: "h-9 w-9",
+        // Heights are tuned to clear the ~40-44px touch target that mobile
+        // guidance (WCAG 2.5.8, Apple/Google HIG) recommends, since this
+        // app is used from phones/tablets on the shop floor as much as
+        // from a desktop.
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3 text-xs",
+        lg: "h-11 rounded-md px-6",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {

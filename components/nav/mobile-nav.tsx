@@ -23,7 +23,7 @@ export function MobileNav({ user }: { user?: MobileNavUser }) {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="פתח תפריט"
-          className="flex size-9 items-center justify-center rounded-md text-foreground hover:bg-surface-muted"
+          className="flex size-10 items-center justify-center rounded-md text-foreground hover:bg-surface-muted"
         >
           <Menu className="size-5" />
         </button>
@@ -43,7 +43,7 @@ export function MobileNav({ user }: { user?: MobileNavUser }) {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="סגור תפריט"
-                className="flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-muted"
+                className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-muted"
               >
                 <X className="size-5" />
               </button>
