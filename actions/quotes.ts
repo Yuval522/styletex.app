@@ -10,6 +10,12 @@ export type QuoteDocumentParseResult =
   | { ok: true; hasTextLayer: false }
   | { ok: false; error: string };
 
+// Independent of the global Server Action body-size limit (next.config.ts) —
+// this caps how large a file we're willing to hand to the PDF parser itself,
+// so a huge upload fails fast with a clear message instead of tying up the
+// function for a long time on a document no one intends to parse anyway.
+const MAX_PARSE_SIZE = 10 * 1024 * 1024; // 10MB
+
 /**
  * Reads an uploaded quote/invoice PDF and returns a best-effort extraction
  * of its line items, subtotal, tax and total — meant to pre-fill the "New
@@ -25,9 +31,19 @@ export async function parseQuotePdf(formData: FormData): Promise<QuoteDocumentPa
   if (file.type !== "application/pdf") {
     return { ok: false, error: "ניתן לנתח קובץ PDF בלבד" };
   }
+  if (file.size > MAX_PARSE_SIZE) {
+    return { ok: false, error: "הקובץ גדול מדי לניתוח אוטומטי (מעל 10MB). ניתן עדיין לצרף אותו ולהזין את הפרטים ידנית." };
+  }
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
+    // A browser can lie about a file's MIME type (or the file can simply be
+    // corrupt) — checking the actual PDF magic bytes before handing this to
+    // the parser avoids feeding it arbitrary binary data.
+    const isPdf = buffer.subarray(0, 5).toString("latin1") === "%PDF-";
+    if (!isPdf) {
+      return { ok: false, error: "הקובץ אינו PDF תקין" };
+    }
     const result = await parseQuoteDocument(buffer);
     if (!result.hasTextLayer) {
       return { ok: true, hasTextLayer: false };

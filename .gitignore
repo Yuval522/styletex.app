@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stray file the sandbox couldn't actually delete (superseded by unpdf,
+# see lib/parse-document.ts) — kept out of git rather than committed
+types/pdf-parse.d.ts.removed-*

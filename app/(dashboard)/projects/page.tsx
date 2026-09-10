@@ -2,8 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
 import { NewProjectDialog } from "@/components/projects/new-project-dialog";
+import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
+import { ProjectStatusSelect } from "@/components/projects/status-select";
 import { Card, CardContent } from "@/components/ui/card";
-import { ProjectStatusBadge } from "@/components/shared/status-badge";
 import { ProjectStepper, getProjectStages } from "@/components/projects/project-stepper";
 import { DeleteButton } from "@/components/shared/delete-button";
 import { deleteProject } from "@/actions/projects";
@@ -89,12 +90,22 @@ export default async function ProjectsPage() {
                         {project.client.name}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <div className="text-end text-xs text-muted-foreground">
                         <p>{project.budget ? formatCurrency(Number(project.budget)) : "—"}</p>
                         <p>{project.targetDate ? formatDate(project.targetDate) : "—"}</p>
                       </div>
-                      <ProjectStatusBadge status={project.status} />
+                      <ProjectStatusSelect projectId={project.id} status={project.status} />
+                      <EditProjectDialog
+                        project={{
+                          id: project.id,
+                          name: project.name,
+                          budget: project.budget ? Number(project.budget) : null,
+                          startDate: project.startDate,
+                          targetDate: project.targetDate,
+                          notes: project.notes,
+                        }}
+                      />
                       <DeleteButton
                         onDelete={deleteProject.bind(null, project.id)}
                         confirmMessage={`למחוק את הפרויקט "${project.name}"? פעולה זו תמחק גם את החדרים, המפרטים, הצעות המחיר וההזמנות המשויכות ואינה הפיכה.`}

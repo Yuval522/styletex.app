@@ -45,6 +45,7 @@ model Project {
   budget     Decimal?      @db.Decimal(12, 2)
   startDate  DateTime?
   targetDate DateTime?
+  notes      String?
 
   rooms          Room[]
   quotes         Quote[]

@@ -32,6 +32,7 @@ export async function updateProject(id: string, formData: FormData) {
   const budgetRaw = String(formData.get("budget") ?? "").trim();
   const targetDateRaw = String(formData.get("targetDate") ?? "").trim();
   const startDateRaw = String(formData.get("startDate") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim() || null;
 
   if (!name) throw new Error("Project name is required");
 
@@ -42,6 +43,7 @@ export async function updateProject(id: string, formData: FormData) {
       budget: budgetRaw ? Number(budgetRaw) : null,
       targetDate: targetDateRaw ? new Date(targetDateRaw) : null,
       startDate: startDateRaw ? new Date(startDateRaw) : null,
+      notes,
     },
   });
 

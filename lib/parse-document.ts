@@ -11,13 +11,17 @@
  * detection is inherently approximate. Everything this returns is meant to
  * pre-fill an editable form for a human to review, never to be trusted
  * blindly.
+ *
+ * Uses `unpdf` rather than the more commonly reached-for `pdf-parse`:
+ * pdf-parse vendors a very old build of Mozilla's PDF.js that assumes a
+ * browser-like environment, and can throw from deep inside its internals
+ * on real-world PDFs in a Node serverless function in ways a surrounding
+ * try/catch here can't reliably contain. `unpdf` ships a build of PDF.js
+ * specifically stripped down and bundled for serverless/edge runtimes —
+ * see https://github.com/unjs/unpdf — which is the actively maintained,
+ * documented replacement for exactly this failure mode.
  */
-
-// Imported from the inner module (not the package root) to avoid a footgun
-// in pdf-parse's index.js: it runs debug-only filesystem code at import
-// time when it thinks it's being run directly rather than required as a
-// dependency. See types/pdf-parse.d.ts for the matching ambient module.
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import { extractText, getDocumentProxy } from "unpdf";
 
 export type ParsedLineItem = {
   description: string;
@@ -125,7 +129,8 @@ function extractLineItems(lines: string[]): ParsedLineItem[] {
 }
 
 export async function parseQuoteDocument(buffer: Buffer): Promise<ParsedQuoteDocument> {
-  const { text } = await pdfParse(buffer);
+  const pdf = await getDocumentProxy(new Uint8Array(buffer));
+  const { text } = await extractText(pdf, { mergePages: true });
   const normalized = text.replace(/\r/g, "");
   const lines = normalized
     .split("\n")

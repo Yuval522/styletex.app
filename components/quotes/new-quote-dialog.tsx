@@ -47,6 +47,7 @@ export function NewQuoteDialog({
   const [pending, setPending] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [parseMessage, setParseMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
 
   function addItem() {
@@ -68,6 +69,12 @@ export function NewQuoteDialog({
     }
     if (file.type !== "application/pdf") {
       setParseMessage(null);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setParseMessage(
+        "הקובץ גדול מדי לניתוח אוטומטי (מעל 10MB). ניתן עדיין לצרף אותו ולהזין את הפרטים ידנית."
+      );
       return;
     }
 
@@ -124,6 +131,7 @@ export function NewQuoteDialog({
   async function handleSubmit(formData: FormData) {
     if (!selectedProjectId) return;
     setPending(true);
+    setSubmitError(null);
     try {
       await createQuote(selectedProjectId, formData);
       router.refresh();
@@ -132,6 +140,16 @@ export function NewQuoteDialog({
       setTax("0");
       setParseMessage(null);
       if (needsProjectPicker) setSelectedProjectId("");
+    } catch (error) {
+      // createQuote() throws on validation failures (no line items, wrong
+      // file type, a PDF over the upload size limit, etc.) — this must be
+      // caught here or it crashes to Next's generic error screen instead
+      // of showing the person what went wrong.
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "יצירת הצעת המחיר נכשלה. נסו שוב, ואם הקובץ גדול נסו קובץ קטן יותר.";
+      setSubmitError(message);
     } finally {
       setPending(false);
     }
@@ -240,6 +258,12 @@ export function NewQuoteDialog({
               }
             >
               {parseMessage}
+            </p>
+          )}
+
+          {submitError && (
+            <p className="rounded-md border border-status-cancelled/40 bg-status-cancelled/10 px-3 py-2 text-xs text-status-cancelled">
+              {submitError}
             </p>
           )}
 

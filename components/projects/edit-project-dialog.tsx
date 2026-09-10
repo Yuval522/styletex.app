@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { updateProject } from "@/actions/projects";
@@ -33,6 +34,7 @@ export function EditProjectDialog({
     budget: number | string | null;
     startDate: Date | string | null;
     targetDate: Date | string | null;
+    notes?: string | null;
   };
 }) {
   const [open, setOpen] = useState(false);
@@ -98,6 +100,16 @@ export function EditProjectDialog({
                 defaultValue={toDateInputValue(project.targetDate)}
               />
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-project-notes">הערות</Label>
+            <Textarea
+              id="edit-project-notes"
+              name="notes"
+              rows={3}
+              defaultValue={project.notes ?? ""}
+              placeholder="הערות פנימיות על הפרויקט…"
+            />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent" disabled={pending}>

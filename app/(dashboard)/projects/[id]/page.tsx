@@ -73,6 +73,7 @@ export default async function ProjectDetailPage({
                 budget: project.budget ? Number(project.budget) : null,
                 startDate: project.startDate,
                 targetDate: project.targetDate,
+                notes: project.notes,
               }}
             />
             <ProjectStatusSelect projectId={project.id} status={project.status} />
