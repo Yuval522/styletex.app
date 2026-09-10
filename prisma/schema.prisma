@@ -46,9 +46,18 @@ model Project {
   startDate  DateTime?
   targetDate DateTime?
   notes      String?
+  // Manual overrides for the vertical lifecycle timeline on the global
+  // /projects view — a map of stage key -> forced done/pending, e.g.
+  // {"quote-sent": true}. The timeline is otherwise fully derived from real
+  // data (client, quote status, payment, project status); this lets a
+  // person tick a step by hand when reality is ahead of what got recorded
+  // in the system, without losing the automatic behavior for every stage
+  // they never touch. See components/projects/project-stepper.tsx.
+  checkpointOverrides Json @default("{}")
 
   rooms          Room[]
   quotes         Quote[]
+  invoices       Invoice[]
   workOrders     WorkOrder[]
   files          FileAsset[]
   calendarEvents CalendarEvent[]
@@ -180,6 +189,55 @@ model QuoteLineItem {
   total       Decimal @db.Decimal(12, 2)
 
   @@index([quoteId])
+}
+
+// ---------- Invoices ----------
+
+enum InvoiceStatus {
+  ISSUED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id        String            @id @default(cuid())
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  // The invoice's own serial number from the source document (e.g.
+  // "01/000411"), when a PDF upload could detect one — purely informational.
+  number    String?
+  status    InvoiceStatus     @default(ISSUED)
+  lineItems InvoiceLineItem[]
+  subtotal  Decimal           @db.Decimal(12, 2)
+  tax       Decimal           @default(0) @db.Decimal(12, 2)
+  total     Decimal           @db.Decimal(12, 2)
+
+  pdfData     Bytes?
+  pdfFileName String?
+  pdfMimeType String?
+  pdfSize     Int?
+
+  issuedAt DateTime  @default(now())
+  dueDate  DateTime?
+  paidAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model InvoiceLineItem {
+  id          String  @id @default(cuid())
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId   String
+  description String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(12, 2)
+
+  @@index([invoiceId])
 }
 
 // ---------- Production ----------

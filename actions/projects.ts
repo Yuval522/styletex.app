@@ -65,6 +65,41 @@ export async function updateProjectStatus(id: string, status: ProjectStatus) {
   return project;
 }
 
+/**
+ * Manually forces one step of the vertical lifecycle timeline (global
+ * /projects view) to done or pending, overriding whatever the automatic
+ * client/quote/payment/status-derived logic would otherwise show for that
+ * step — see components/projects/project-stepper.tsx. Clicking the same
+ * checkpoint again flips it back, and toggling it to match what the
+ * automatic logic already says effectively clears the override (it just
+ * won't visibly change anything).
+ */
+export async function toggleProjectCheckpoint(
+  projectId: string,
+  stageKey: string,
+  done: boolean
+) {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { checkpointOverrides: true },
+  });
+  if (!project) throw new Error("הפרויקט לא נמצא");
+
+  const overrides =
+    project.checkpointOverrides && typeof project.checkpointOverrides === "object"
+      ? { ...(project.checkpointOverrides as Record<string, boolean>) }
+      : {};
+  overrides[stageKey] = done;
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { checkpointOverrides: overrides },
+  });
+
+  revalidatePath("/projects");
+  revalidatePath(`/projects/${projectId}`);
+}
+
 export async function deleteProject(id: string) {
   const project = await prisma.project.delete({ where: { id } });
 

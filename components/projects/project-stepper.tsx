@@ -1,6 +1,11 @@
+"use client";
+
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { PaymentToggle } from "@/components/quotes/payment-toggle";
+import { toggleProjectCheckpoint } from "@/actions/projects";
 import type { ProjectStatus, QuoteStatus } from "@prisma/client";
 
 type StageState = "done" | "current" | "warning" | "upcoming";
@@ -10,6 +15,9 @@ type Stage = {
   title: string;
   detail: string;
   state: StageState;
+  /** True when a person overrode this step by hand rather than it being
+   * derived automatically from real data. */
+  manual: boolean;
   action?: React.ReactNode;
 };
 
@@ -25,15 +33,20 @@ const PROJECT_EXECUTION_LABEL: Record<ProjectStatus, string> = {
 };
 
 /**
- * Builds the 5-step lifecycle tracker for a single project, entirely
- * from real, persisted data: the client record, the most recent quote
- * (status, PDF, paid flag), and the project's own status/start date.
+ * Builds the 5-step lifecycle tracker for a single project, from real,
+ * persisted data (the client record, the most recent quote, the project's
+ * own status/start date) — with an optional manual override per step, keyed
+ * by stage `key`, layered on top. An override forces that one step to
+ * "done" or "upcoming" regardless of what the automatic logic would say;
+ * every step without an override keeps behaving exactly as before. See
+ * actions/projects.ts::toggleProjectCheckpoint.
  */
 export function getProjectStages({
   client,
   latestQuote,
   projectStatus,
   startDate,
+  overrides = {},
 }: {
   client: { name: string; email: string | null; phone: string | null };
   latestQuote: {
@@ -45,8 +58,9 @@ export function getProjectStages({
   } | null;
   projectStatus: ProjectStatus;
   startDate: Date | null;
+  overrides?: Record<string, boolean>;
 }): Stage[] {
-  const stages: Stage[] = [];
+  const stages: Omit<Stage, "manual">[] = [];
 
   // 1. Client details
   stages.push({
@@ -129,10 +143,24 @@ export function getProjectStages({
     state: cancelled ? "warning" : complete || executing ? "done" : projectStatus === "APPROVED" ? "current" : "upcoming",
   });
 
-  return stages;
+  return stages.map((stage) => {
+    const override = overrides[stage.key];
+    if (override === undefined) return { ...stage, manual: false };
+    return {
+      ...stage,
+      state: override ? "done" : "upcoming",
+      manual: true,
+    };
+  });
 }
 
-export function ProjectStepper({ stages }: { stages: Stage[] }) {
+export function ProjectStepper({
+  projectId,
+  stages,
+}: {
+  projectId: string;
+  stages: Stage[];
+}) {
   return (
     <ol>
       {stages.map((stage, index) => {
@@ -140,7 +168,7 @@ export function ProjectStepper({ stages }: { stages: Stage[] }) {
         return (
           <li key={stage.key} className="flex gap-3">
             <div className="flex flex-col items-center">
-              <StageDot state={stage.state} />
+              <StageDot projectId={projectId} stage={stage} />
               {!isLast && (
                 <span
                   className={cn(
@@ -159,6 +187,11 @@ export function ProjectStepper({ stages }: { stages: Stage[] }) {
                   )}
                 >
                   {stage.title}
+                  {stage.manual && (
+                    <span className="ms-1.5 text-xs font-normal text-muted-foreground">
+                      (סומן ידנית)
+                    </span>
+                  )}
                 </p>
                 {stage.action}
               </div>
@@ -178,23 +211,59 @@ export function ProjectStepper({ stages }: { stages: Stage[] }) {
   );
 }
 
-function StageDot({ state }: { state: StageState }) {
-  if (state === "done") {
-    return <CheckCircle2 className="size-5 shrink-0 text-accent" />;
+/**
+ * The checkmark dot doubles as the toggle control: clicking it marks that
+ * checkpoint done (or, if it's already done, reverts it back to pending) —
+ * see actions/projects.ts::toggleProjectCheckpoint. The very first "client
+ * details" step is never actionable, since a project always has a client.
+ */
+function StageDot({ projectId, stage }: { projectId: string; stage: Stage }) {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const isDone = stage.state === "done";
+  const toggleable = stage.key !== "client";
+
+  function handleClick() {
+    if (!toggleable || isPending) return;
+    startTransition(async () => {
+      await toggleProjectCheckpoint(projectId, stage.key, !isDone);
+      router.refresh();
+    });
   }
-  if (state === "warning") {
-    return <XCircle className="size-5 shrink-0 text-status-cancelled" />;
-  }
-  if (state === "current") {
-    return (
+
+  const label = isDone
+    ? `סמן "${stage.title}" כלא הושלם`
+    : `סמן "${stage.title}" כהושלם`;
+
+  const dot =
+    stage.state === "done" ? (
+      <CheckCircle2 className="size-5 shrink-0 text-accent" />
+    ) : stage.state === "warning" ? (
+      <XCircle className="size-5 shrink-0 text-status-cancelled" />
+    ) : stage.state === "current" ? (
       <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center">
         <span className="size-2.5 rounded-full bg-accent ring-4 ring-accent-soft" />
       </span>
+    ) : (
+      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center">
+        <span className="size-2.5 rounded-full border-2 border-border bg-surface" />
+      </span>
     );
-  }
+
+  if (!toggleable) return dot;
+
   return (
-    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center">
-      <span className="size-2.5 rounded-full border-2 border-border bg-surface" />
-    </span>
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isPending}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "flex size-8 shrink-0 -m-1.5 items-center justify-center rounded-full transition-colors hover:bg-surface-muted disabled:opacity-60",
+      )}
+    >
+      {dot}
+    </button>
   );
 }

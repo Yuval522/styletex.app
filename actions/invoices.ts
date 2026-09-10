@@ -2,28 +2,38 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { QuoteStatus } from "@prisma/client";
+import { InvoiceStatus } from "@prisma/client";
 import { parseFinancialDocument, type ParsedLineItem } from "@/lib/parse-document";
 
-export type QuoteDocumentParseResult =
-  | { ok: true; hasTextLayer: true; lineItems: ParsedLineItem[]; subtotal: number | null; tax: number | null; total: number | null; textPreview: string }
+export type InvoiceDocumentParseResult =
+  | {
+      ok: true;
+      hasTextLayer: true;
+      lineItems: ParsedLineItem[];
+      subtotal: number | null;
+      tax: number | null;
+      total: number | null;
+      documentNumber: string | null;
+      textPreview: string;
+    }
   | { ok: true; hasTextLayer: false }
   | { ok: false; error: string };
 
 // Independent of the global Server Action body-size limit (next.config.ts) —
-// this caps how large a file we're willing to hand to the PDF parser itself,
-// so a huge upload fails fast with a clear message instead of tying up the
-// function for a long time on a document no one intends to parse anyway.
+// this caps how large a file we're willing to hand to the PDF parser
+// itself, so a huge upload fails fast with a clear message instead of
+// tying up the function for a long time on a document no one intends to
+// parse anyway.
 const MAX_PARSE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
- * Reads an uploaded quote/invoice PDF and returns a best-effort extraction
- * of its line items, subtotal, tax and total — meant to pre-fill the "New
- * Quote" form, never to be saved unreviewed. Read-only: this never touches
- * the database. See lib/parse-document.ts for the extraction approach and
- * its known limitations (no OCR, and Hebrew RTL text-order quirks).
+ * Reads an uploaded invoice PDF and returns a best-effort extraction of its
+ * line items, subtotal, tax, total and invoice number — meant to pre-fill
+ * the "New Invoice" form, never to be saved unreviewed. Read-only: this
+ * never touches the database. See lib/parse-document.ts for the extraction
+ * approach and its known limitations (no OCR).
  */
-export async function parseQuotePdf(formData: FormData): Promise<QuoteDocumentParseResult> {
+export async function parseInvoicePdf(formData: FormData): Promise<InvoiceDocumentParseResult> {
   const file = formData.get("pdf");
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, error: "לא נבחר קובץ" };
@@ -55,19 +65,22 @@ export async function parseQuotePdf(formData: FormData): Promise<QuoteDocumentPa
       subtotal: result.subtotal,
       tax: result.tax,
       total: result.total,
+      documentNumber: result.documentNumber,
       textPreview: result.textPreview,
     };
   } catch (error) {
-    console.error("[parseQuotePdf] failed to parse PDF —", error);
+    console.error("[parseInvoicePdf] failed to parse PDF —", error);
     return { ok: false, error: "ניתוח הקובץ נכשל. ניתן להזין את הפרטים ידנית." };
   }
 }
 
-export async function createQuote(projectId: string, formData: FormData) {
+export async function createInvoice(projectId: string, formData: FormData) {
   const descriptions = formData.getAll("description") as string[];
   const quantities = formData.getAll("quantity") as string[];
   const unitPrices = formData.getAll("unitPrice") as string[];
   const taxRaw = String(formData.get("tax") ?? "0");
+  const number = String(formData.get("number") ?? "").trim() || null;
+  const dueDateRaw = String(formData.get("dueDate") ?? "").trim();
 
   const lineItems = descriptions
     .map((description, i) => {
@@ -88,25 +101,19 @@ export async function createQuote(projectId: string, formData: FormData) {
   const tax = Number(taxRaw) || 0;
   const total = subtotal + tax;
 
-  const existingCount = await prisma.quote.count({ where: { projectId } });
-
   const pdfFields = await readPdfField(formData);
 
-  await prisma.quote.create({
+  await prisma.invoice.create({
     data: {
       projectId,
-      version: existingCount + 1,
+      number,
       subtotal,
       tax,
       total,
+      dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
       lineItems: { create: lineItems },
       ...pdfFields,
     },
-  });
-
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { status: "QUOTED" },
   });
 
   revalidatePath(`/projects/${projectId}`);
@@ -129,74 +136,73 @@ async function readPdfField(formData: FormData) {
   };
 }
 
-export async function attachQuotePdf(quoteId: string, formData: FormData) {
+export async function attachInvoicePdf(invoiceId: string, formData: FormData) {
   const pdfFields = await readPdfField(formData);
   if (!pdfFields.pdfData) {
     throw new Error("לא נבחר קובץ PDF");
   }
 
-  const quote = await prisma.quote.update({
-    where: { id: quoteId },
+  const invoice = await prisma.invoice.update({
+    where: { id: invoiceId },
     data: pdfFields,
     select: { projectId: true },
   });
 
-  revalidatePath(`/projects/${quote.projectId}`);
+  revalidatePath(`/projects/${invoice.projectId}`);
   revalidatePath("/quotes");
 }
 
-export async function removeQuotePdf(quoteId: string) {
-  const quote = await prisma.quote.update({
-    where: { id: quoteId },
+export async function removeInvoicePdf(invoiceId: string) {
+  const invoice = await prisma.invoice.update({
+    where: { id: invoiceId },
     data: { pdfData: null, pdfFileName: null, pdfMimeType: null, pdfSize: null },
     select: { projectId: true },
   });
 
-  revalidatePath(`/projects/${quote.projectId}`);
+  revalidatePath(`/projects/${invoice.projectId}`);
   revalidatePath("/quotes");
 }
 
-export async function updateQuoteStatus(
+export async function updateInvoiceStatus(
   projectId: string,
-  quoteId: string,
-  status: QuoteStatus
+  invoiceId: string,
+  status: InvoiceStatus
 ) {
-  await prisma.quote.update({
-    where: { id: quoteId },
-    data: { status },
+  await prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      status,
+      // Keep paidAt in sync with the status itself, whichever direction
+      // it's being switched — see updateInvoicePaid() for the same rule
+      // driven from the payment toggle instead of the status dropdown.
+      paidAt: status === "PAID" ? new Date() : null,
+    },
   });
-
-  if (status === "APPROVED") {
-    await prisma.project.update({
-      where: { id: projectId },
-      data: { status: "APPROVED" },
-    });
-  }
 
   revalidatePath(`/projects/${projectId}`);
-  revalidatePath("/projects");
   revalidatePath("/quotes");
 }
 
-export async function updateQuotePaid(quoteId: string, paid: boolean) {
-  const quote = await prisma.quote.update({
-    where: { id: quoteId },
-    data: { paid, paidAt: paid ? new Date() : null },
+export async function updateInvoicePaid(invoiceId: string, paid: boolean) {
+  const invoice = await prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      status: paid ? "PAID" : "ISSUED",
+      paidAt: paid ? new Date() : null,
+    },
     select: { projectId: true },
   });
 
-  revalidatePath(`/projects/${quote.projectId}`);
-  revalidatePath("/projects");
+  revalidatePath(`/projects/${invoice.projectId}`);
   revalidatePath("/quotes");
 }
 
-export async function deleteQuote(quoteId: string) {
-  const quote = await prisma.quote.delete({
-    where: { id: quoteId },
+export async function deleteInvoice(invoiceId: string) {
+  const invoice = await prisma.invoice.delete({
+    where: { id: invoiceId },
     select: { projectId: true },
   });
 
-  revalidatePath(`/projects/${quote.projectId}`);
-  revalidatePath("/projects");
+  revalidatePath(`/projects/${invoice.projectId}`);
   revalidatePath("/quotes");
 }

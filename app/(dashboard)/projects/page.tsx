@@ -73,6 +73,11 @@ export default async function ProjectsPage() {
               latestQuote,
               projectStatus: project.status,
               startDate: project.startDate,
+              overrides:
+                project.checkpointOverrides &&
+                typeof project.checkpointOverrides === "object"
+                  ? (project.checkpointOverrides as Record<string, boolean>)
+                  : {},
             });
 
             return (
@@ -113,7 +118,7 @@ export default async function ProjectsPage() {
                     </div>
                   </div>
 
-                  <ProjectStepper stages={stages} />
+                  <ProjectStepper projectId={project.id} stages={stages} />
                 </CardContent>
               </Card>
             );

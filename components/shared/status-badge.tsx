@@ -75,6 +75,33 @@ export function QuoteStatusBadge({ status }: { status: string }) {
   );
 }
 
+const INVOICE_STATUS_LABEL: Record<string, string> = {
+  ISSUED: "הופקה",
+  PAID: "שולמה",
+  OVERDUE: "באיחור",
+  CANCELLED: "בוטלה",
+};
+
+const INVOICE_STATUS_COLOR: Record<string, string> = {
+  ISSUED: "bg-status-design/15 text-status-design",
+  PAID: "bg-status-approved/15 text-status-approved",
+  OVERDUE: "bg-status-cancelled/15 text-status-cancelled",
+  CANCELLED: "bg-surface-muted text-muted-foreground",
+};
+
+export function InvoiceStatusBadge({ status }: { status: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
+        INVOICE_STATUS_COLOR[status] ?? "bg-surface-muted text-foreground"
+      )}
+    >
+      {INVOICE_STATUS_LABEL[status] ?? status}
+    </span>
+  );
+}
+
 export const STAGE_LABEL: Record<string, string> = {
   CUTTING: "חיתוך",
   ASSEMBLY: "הרכבה",

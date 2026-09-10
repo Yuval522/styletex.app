@@ -19,7 +19,7 @@ export const NAV_ITEMS = [
   { href: "/", label: "סקירה כללית", icon: LayoutDashboard },
   { href: "/clients", label: "לקוחות", icon: Users },
   { href: "/projects", label: "פרויקטים", icon: FolderKanban },
-  { href: "/quotes", label: "מעקב הצעות מחיר", icon: FileText },
+  { href: "/quotes", label: "מעקב מסמכים", icon: FileText },
   { href: "/calendar", label: "לוח שנה", icon: CalendarDays },
   { href: "/production", label: "ייצור", icon: Hammer },
   { href: "/materials", label: "חומרים", icon: Boxes },
