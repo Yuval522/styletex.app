@@ -3,6 +3,49 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { QuoteStatus } from "@prisma/client";
+import { parseQuoteDocument, type ParsedLineItem } from "@/lib/parse-document";
+
+export type QuoteDocumentParseResult =
+  | { ok: true; hasTextLayer: true; lineItems: ParsedLineItem[]; subtotal: number | null; tax: number | null; total: number | null; textPreview: string }
+  | { ok: true; hasTextLayer: false }
+  | { ok: false; error: string };
+
+/**
+ * Reads an uploaded quote/invoice PDF and returns a best-effort extraction
+ * of its line items, subtotal, tax and total — meant to pre-fill the "New
+ * Quote" form, never to be saved unreviewed. Read-only: this never touches
+ * the database. See lib/parse-document.ts for the extraction approach and
+ * its known limitations (no OCR, and Hebrew RTL text-order quirks).
+ */
+export async function parseQuotePdf(formData: FormData): Promise<QuoteDocumentParseResult> {
+  const file = formData.get("pdf");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "לא נבחר קובץ" };
+  }
+  if (file.type !== "application/pdf") {
+    return { ok: false, error: "ניתן לנתח קובץ PDF בלבד" };
+  }
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const result = await parseQuoteDocument(buffer);
+    if (!result.hasTextLayer) {
+      return { ok: true, hasTextLayer: false };
+    }
+    return {
+      ok: true,
+      hasTextLayer: true,
+      lineItems: result.lineItems,
+      subtotal: result.subtotal,
+      tax: result.tax,
+      total: result.total,
+      textPreview: result.textPreview,
+    };
+  } catch (error) {
+    console.error("[parseQuotePdf] failed to parse PDF —", error);
+    return { ok: false, error: "ניתוח הקובץ נכשל. ניתן להזין את הפרטים ידנית." };
+  }
+}
 
 export async function createQuote(projectId: string, formData: FormData) {
   const descriptions = formData.getAll("description") as string[];

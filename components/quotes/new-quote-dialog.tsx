@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { FileScan, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createQuote } from "@/actions/quotes";
+import { createQuote, parseQuotePdf } from "@/actions/quotes";
 
 type LineItem = { id: number; description: string; quantity: string; unitPrice: string };
 type ProjectOption = { id: string; name: string; client: { name: string } };
@@ -43,7 +43,10 @@ export function NewQuoteDialog({
   const [open, setOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(projectId ?? "");
   const [items, setItems] = useState<LineItem[]>([{ ...EMPTY_ITEM }]);
+  const [tax, setTax] = useState("0");
   const [pending, setPending] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const [parseMessage, setParseMessage] = useState<string | null>(null);
   const router = useRouter();
 
   function addItem() {
@@ -57,6 +60,67 @@ export function NewQuoteDialog({
     setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setParseMessage(null);
+      return;
+    }
+    if (file.type !== "application/pdf") {
+      setParseMessage(null);
+      return;
+    }
+
+    setParsing(true);
+    setParseMessage("מנתח את הקובץ…");
+    try {
+      const formData = new FormData();
+      formData.set("pdf", file);
+      const result = await parseQuotePdf(formData);
+
+      if (!result.ok) {
+        setParseMessage(result.error);
+        return;
+      }
+      if (!result.hasTextLayer) {
+        setParseMessage(
+          "המסמך נראה כתמונה סרוקה ללא שכבת טקסט — לא ניתן היה לחלץ נתונים אוטומטית. יש להזין את הפרטים ידנית."
+        );
+        return;
+      }
+
+      if (result.lineItems.length > 0) {
+        setItems(
+          result.lineItems.map((item, i) => ({
+            id: Date.now() + i,
+            description: item.description,
+            quantity: String(item.quantity),
+            unitPrice: String(item.unitPrice),
+          }))
+        );
+      }
+      if (result.tax !== null) {
+        setTax(String(result.tax));
+      }
+
+      const parts: string[] = [];
+      parts.push(
+        result.lineItems.length > 0
+          ? `זוהו ${result.lineItems.length} שורות פריטים מהמסמך`
+          : "לא זוהו שורות פריטים במסמך — ניתן להזין ידנית"
+      );
+      if (result.total !== null) {
+        parts.push(`סה"כ שמופיע במסמך: ${result.total.toLocaleString("he-IL")} ₪ (להשוואה)`);
+      }
+      parts.push("בדקו ותקנו לפני שמירה.");
+      setParseMessage(parts.join(" · "));
+    } catch {
+      setParseMessage("ניתוח הקובץ נכשל. ניתן להזין את הפרטים ידנית.");
+    } finally {
+      setParsing(false);
+    }
+  }
+
   async function handleSubmit(formData: FormData) {
     if (!selectedProjectId) return;
     setPending(true);
@@ -65,6 +129,8 @@ export function NewQuoteDialog({
       router.refresh();
       setOpen(false);
       setItems([{ ...EMPTY_ITEM }]);
+      setTax("0");
+      setParseMessage(null);
       if (needsProjectPicker) setSelectedProjectId("");
     } finally {
       setPending(false);
@@ -136,19 +202,46 @@ export function NewQuoteDialog({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="tax">מע&quot;מ</Label>
-              <Input id="tax" name="tax" type="number" step="0.01" defaultValue="0" />
+              <Input
+                id="tax"
+                name="tax"
+                type="number"
+                step="0.01"
+                value={tax}
+                onChange={(e) => setTax(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="pdf">קובץ הצעת מחיר (PDF, לא חובה)</Label>
+              <Label htmlFor="pdf" className="flex items-center gap-1.5">
+                <FileScan className="size-3.5" />
+                קובץ הצעת מחיר / חשבונית (PDF, לא חובה)
+              </Label>
               <input
                 id="pdf"
                 name="pdf"
                 type="file"
                 accept="application/pdf"
+                onChange={handleFileChange}
                 className="block w-full text-sm text-muted-foreground file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-border/60"
               />
+              <p className="text-xs text-muted-foreground">
+                העלאת קובץ תנסה לזהות אוטומטית שורות, כמויות ומחירים מתוך המסמך.
+              </p>
             </div>
           </div>
+
+          {parseMessage && (
+            <p
+              className={
+                "rounded-md border px-3 py-2 text-xs " +
+                (parsing
+                  ? "border-border bg-surface-muted text-muted-foreground"
+                  : "border-accent-soft bg-accent-soft/40 text-foreground")
+              }
+            >
+              {parseMessage}
+            </p>
+          )}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="submit" variant="accent" disabled={pending || !selectedProjectId}>
