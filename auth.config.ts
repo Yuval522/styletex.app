@@ -14,6 +14,13 @@ import type { NextAuthConfig } from "next-auth";
 const PUBLIC_PATHS = ["/login", "/setup"];
 
 export const authConfig: NextAuthConfig = {
+  // Set explicitly instead of relying on NextAuth's automatic env-var
+  // detection — falls back to the old NextAuth v4 name (NEXTAUTH_SECRET)
+  // in case that's what was actually configured on Vercel by mistake.
+  // If both are undefined, Auth.js will still throw its own clear
+  // "MissingSecret" error — this doesn't hide that, it just widens what
+  // counts as "found".
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
   },
