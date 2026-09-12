@@ -43,6 +43,7 @@ export function NewQuoteDialog({
   const [open, setOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(projectId ?? "");
   const [items, setItems] = useState<LineItem[]>([{ ...EMPTY_ITEM }]);
+  const [discount, setDiscount] = useState("0");
   const [tax, setTax] = useState("0");
   const [pending, setPending] = useState(false);
   const [parsing, setParsing] = useState(false);
@@ -106,6 +107,9 @@ export function NewQuoteDialog({
           }))
         );
       }
+      if (result.discount !== null) {
+        setDiscount(String(result.discount));
+      }
       if (result.tax !== null) {
         setTax(String(result.tax));
       }
@@ -116,6 +120,9 @@ export function NewQuoteDialog({
           ? `זוהו ${result.lineItems.length} שורות פריטים מהמסמך`
           : "לא זוהו שורות פריטים במסמך — ניתן להזין ידנית"
       );
+      if (result.discount !== null && result.discount > 0) {
+        parts.push(`זוהתה הנחה של ${result.discount.toLocaleString("he-IL")} ₪ במסמך`);
+      }
       if (result.total !== null) {
         parts.push(`סה"כ שמופיע במסמך: ${result.total.toLocaleString("he-IL")} ₪ (להשוואה)`);
       }
@@ -140,6 +147,7 @@ export function NewQuoteDialog({
       router.refresh();
       setOpen(false);
       setItems([{ ...EMPTY_ITEM }]);
+      setDiscount("0");
       setTax("0");
       setParseMessage(null);
       if (needsProjectPicker) setSelectedProjectId("");
@@ -230,6 +238,17 @@ export function NewQuoteDialog({
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
+              <Label htmlFor="discount">הנחה</Label>
+              <Input
+                id="discount"
+                name="discount"
+                type="number"
+                step="0.01"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="tax">מע&quot;מ</Label>
               <Input
                 id="tax"
@@ -240,23 +259,24 @@ export function NewQuoteDialog({
                 onChange={(e) => setTax(e.target.value)}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="pdf" className="flex items-center gap-1.5">
-                <FileScan className="size-3.5" />
-                קובץ הצעת מחיר / חשבונית (PDF, לא חובה)
-              </Label>
-              <input
-                id="pdf"
-                name="pdf"
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-muted-foreground file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-border/60"
-              />
-              <p className="text-xs text-muted-foreground">
-                העלאת קובץ תנסה לזהות אוטומטית שורות, כמויות ומחירים מתוך המסמך.
-              </p>
-            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="pdf" className="flex items-center gap-1.5">
+              <FileScan className="size-3.5" />
+              קובץ הצעת מחיר / חשבונית (PDF, לא חובה)
+            </Label>
+            <input
+              id="pdf"
+              name="pdf"
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-muted-foreground file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-border/60"
+            />
+            <p className="text-xs text-muted-foreground">
+              העלאת קובץ תנסה לזהות אוטומטית שורות, כמויות, מחירים והנחה מתוך המסמך.
+            </p>
           </div>
 
           {parseMessage && (

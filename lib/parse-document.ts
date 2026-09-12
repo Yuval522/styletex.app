@@ -54,6 +54,24 @@
  *    (after all the boilerplate terms). Same-line keyword matching can
  *    never find these two figures, so a positional fallback is used
  *    instead — see findTrailingOrphanTotals().
+ * 3. A discount, when the document has one, sits in that same disconnected
+ *    "values in one place, labels somewhere else" layout as quirk 2, right
+ *    after the line-items table: three bare orphan lines in a row —
+ *    subtotal-before-discount, the discount amount (in parentheses, e.g.
+ *    "(4,113.81)", which this generator's convention is to print as an
+ *    implicitly negative number), then subtotal-after-discount — followed
+ *    by their three labels ("סה"כ ללא מע"מ:", "סה"כ לתשלום:", "סה"כ לאחר
+ *    הנחה:") with no discount % or ₪ mentioned anywhere else. A document
+ *    with no discount prints the same three-line shape with the middle
+ *    value as a bare "0.00" instead of a parenthesized figure, so treating
+ *    the parenthesized form as *implicitly negative* and requiring
+ *    before + discount ≈ after (see findDiscountAmount()) handles both
+ *    cases with one rule instead of needing a separate "no discount" path.
+ *    This discount is subtracted from the line-items subtotal *before*
+ *    adding tax — total = subtotal − discount + tax — which is what makes
+ *    the final total match the document's own "סה"כ לתשלום" figure;
+ *    without it, a discounted document's total comes out too high by
+ *    exactly the discount amount.
  *
  * Uses `unpdf` rather than the more commonly reached-for `pdf-parse`:
  * pdf-parse vendors a very old build of Mozilla's PDF.js that assumes a
@@ -76,7 +94,10 @@ export type ParsedFinancialDocument = {
   /** True once we found a usable text layer at all. */
   hasTextLayer: boolean;
   lineItems: ParsedLineItem[];
+  /** Sum of the line items found — before any discount. */
   subtotal: number | null;
+  /** Amount subtracted from `subtotal` before tax; 0 when none was found. */
+  discount: number | null;
   tax: number | null;
   total: number | null;
   /** e.g. "01/000411" — the document's own serial number, if recognized. */
@@ -102,6 +123,10 @@ export type ParsedFinancialDocument = {
 const MONEY = /(?<!\.)(?<!\.\d)-?\d{1,3}(?:,\d{3})*\.\d{2}/;
 const MONEY_G = new RegExp(MONEY.source, "g");
 const ORPHAN_VALUE_LINE = new RegExp(`^${MONEY.source}$`);
+// A discount amount prints as the same bare money figure, but wrapped in
+// parentheses (e.g. "(4,113.81)") — this generator's convention for "this
+// is subtracted", never an actual minus sign.
+const ORPHAN_NEGATIVE_VALUE_LINE = new RegExp(`^\\(${MONEY.source}\\)$`);
 const LEADING_QTY = /^(\d{1,3}(?:,\d{3})*\.\d{2})\s+(.+)$/;
 // A row's own price+total always sit at the very end of the text the row
 // extracts as — "<unitPrice-or-total> <the other one> <bare index>" with
@@ -162,6 +187,38 @@ function findTrailingOrphanTotals(lines: string[]): { total: number | null; tax:
     return { total: null, tax: null };
   }
   return { total, tax };
+}
+
+/**
+ * Positional detection for a discount, using the same disconnected
+ * "values in one place, labels somewhere else" layout as
+ * findTrailingOrphanTotals — see quirk 3 in the file-level docstring for
+ * the exact three-line shape this looks for (subtotal-before-discount,
+ * the discount itself, subtotal-after-discount) and why treating a
+ * parenthesized value as implicitly negative lets one arithmetic check
+ * cover both the "has a discount" and "no discount at all" cases.
+ * Returns 0 (not null) when the document has no discount, so callers can
+ * tell "confidently zero" apart from "couldn't find this section at all".
+ */
+function findDiscountAmount(lines: string[]): number | null {
+  const candidates: number[] = [];
+  for (const line of lines) {
+    if (ORPHAN_VALUE_LINE.test(line)) {
+      candidates.push(toNumber(line));
+    } else if (ORPHAN_NEGATIVE_VALUE_LINE.test(line)) {
+      candidates.push(-toNumber(line.slice(1, -1)));
+    }
+  }
+
+  for (let i = 0; i + 2 < candidates.length; i++) {
+    const before = candidates[i];
+    const adjustment = candidates[i + 1];
+    const after = candidates[i + 2];
+    if (before > 0 && after > 0 && Math.abs(before + adjustment - after) <= Math.max(1, before * 0.02)) {
+      return adjustment < 0 ? -adjustment : 0;
+    }
+  }
+  return null;
 }
 
 /**
@@ -313,6 +370,7 @@ export async function parseFinancialDocument(buffer: Buffer): Promise<ParsedFina
       hasTextLayer: false,
       lineItems: [],
       subtotal: null,
+      discount: null,
       tax: null,
       total: null,
       documentNumber: null,
@@ -331,6 +389,8 @@ export async function parseFinancialDocument(buffer: Buffer): Promise<ParsedFina
       ? Math.round(lineItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0) * 100) / 100
       : findAmountForKeywords(lines, SUBTOTAL_KEYWORDS);
 
+  const discount = findDiscountAmount(lines);
+
   const positional = findTrailingOrphanTotals(lines);
   const tax = positional.tax ?? findAmountForKeywords(lines, TAX_KEYWORDS);
   const total = positional.total ?? findAmountForKeywords(lines, TOTAL_KEYWORDS);
@@ -341,6 +401,7 @@ export async function parseFinancialDocument(buffer: Buffer): Promise<ParsedFina
     hasTextLayer: true,
     lineItems,
     subtotal,
+    discount,
     tax,
     total,
     documentNumber,

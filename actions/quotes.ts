@@ -6,7 +6,16 @@ import { QuoteStatus } from "@prisma/client";
 import { parseFinancialDocument, type ParsedLineItem } from "@/lib/parse-document";
 
 export type QuoteDocumentParseResult =
-  | { ok: true; hasTextLayer: true; lineItems: ParsedLineItem[]; subtotal: number | null; tax: number | null; total: number | null; textPreview: string }
+  | {
+      ok: true;
+      hasTextLayer: true;
+      lineItems: ParsedLineItem[];
+      subtotal: number | null;
+      discount: number | null;
+      tax: number | null;
+      total: number | null;
+      textPreview: string;
+    }
   | { ok: true; hasTextLayer: false }
   | { ok: false; error: string };
 
@@ -53,6 +62,7 @@ export async function parseQuotePdf(formData: FormData): Promise<QuoteDocumentPa
       hasTextLayer: true,
       lineItems: result.lineItems,
       subtotal: result.subtotal,
+      discount: result.discount,
       tax: result.tax,
       total: result.total,
       textPreview: result.textPreview,
@@ -67,6 +77,7 @@ export async function createQuote(projectId: string, formData: FormData) {
   const descriptions = formData.getAll("description") as string[];
   const quantities = formData.getAll("quantity") as string[];
   const unitPrices = formData.getAll("unitPrice") as string[];
+  const discountRaw = String(formData.get("discount") ?? "0");
   const taxRaw = String(formData.get("tax") ?? "0");
 
   const lineItems = descriptions
@@ -85,8 +96,11 @@ export async function createQuote(projectId: string, formData: FormData) {
   if (lineItems.length === 0) throw new Error("יש להזין לפחות שורת פריט אחת עם תיאור");
 
   const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
+  const discount = Number(discountRaw) || 0;
   const tax = Number(taxRaw) || 0;
-  const total = subtotal + tax;
+  // Discount is applied before tax, matching how the source documents
+  // compute their own "total to pay" — see lib/parse-document.ts quirk 3.
+  const total = subtotal - discount + tax;
 
   const existingCount = await prisma.quote.count({ where: { projectId } });
 
@@ -97,6 +111,7 @@ export async function createQuote(projectId: string, formData: FormData) {
       projectId,
       version: existingCount + 1,
       subtotal,
+      discount,
       tax,
       total,
       lineItems: { create: lineItems },

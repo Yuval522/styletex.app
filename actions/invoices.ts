@@ -11,6 +11,7 @@ export type InvoiceDocumentParseResult =
       hasTextLayer: true;
       lineItems: ParsedLineItem[];
       subtotal: number | null;
+      discount: number | null;
       tax: number | null;
       total: number | null;
       documentNumber: string | null;
@@ -63,6 +64,7 @@ export async function parseInvoicePdf(formData: FormData): Promise<InvoiceDocume
       hasTextLayer: true,
       lineItems: result.lineItems,
       subtotal: result.subtotal,
+      discount: result.discount,
       tax: result.tax,
       total: result.total,
       documentNumber: result.documentNumber,
@@ -78,6 +80,7 @@ export async function createInvoice(projectId: string, formData: FormData) {
   const descriptions = formData.getAll("description") as string[];
   const quantities = formData.getAll("quantity") as string[];
   const unitPrices = formData.getAll("unitPrice") as string[];
+  const discountRaw = String(formData.get("discount") ?? "0");
   const taxRaw = String(formData.get("tax") ?? "0");
   const number = String(formData.get("number") ?? "").trim() || null;
   const dueDateRaw = String(formData.get("dueDate") ?? "").trim();
@@ -98,8 +101,11 @@ export async function createInvoice(projectId: string, formData: FormData) {
   if (lineItems.length === 0) throw new Error("יש להזין לפחות שורת פריט אחת עם תיאור");
 
   const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
+  const discount = Number(discountRaw) || 0;
   const tax = Number(taxRaw) || 0;
-  const total = subtotal + tax;
+  // Discount is applied before tax, matching how the source documents
+  // compute their own "total to pay" — see lib/parse-document.ts quirk 3.
+  const total = subtotal - discount + tax;
 
   const pdfFields = await readPdfField(formData);
 
@@ -108,6 +114,7 @@ export async function createInvoice(projectId: string, formData: FormData) {
       projectId,
       number,
       subtotal,
+      discount,
       tax,
       total,
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,

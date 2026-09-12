@@ -45,6 +45,7 @@ export function NewInvoiceDialog({
   const [open, setOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(projectId ?? "");
   const [items, setItems] = useState<LineItem[]>([{ ...EMPTY_ITEM }]);
+  const [discount, setDiscount] = useState("0");
   const [tax, setTax] = useState("0");
   const [number, setNumber] = useState("");
   const [pending, setPending] = useState(false);
@@ -109,6 +110,9 @@ export function NewInvoiceDialog({
           }))
         );
       }
+      if (result.discount !== null) {
+        setDiscount(String(result.discount));
+      }
       if (result.tax !== null) {
         setTax(String(result.tax));
       }
@@ -122,6 +126,9 @@ export function NewInvoiceDialog({
           ? `זוהו ${result.lineItems.length} שורות פריטים מהמסמך`
           : "לא זוהו שורות פריטים במסמך — ניתן להזין ידנית"
       );
+      if (result.discount !== null && result.discount > 0) {
+        parts.push(`זוהתה הנחה של ${result.discount.toLocaleString("he-IL")} ₪ במסמך`);
+      }
       if (result.total !== null) {
         parts.push(`סה"כ שמופיע במסמך: ${result.total.toLocaleString("he-IL")} ₪ (להשוואה)`);
       }
@@ -146,6 +153,7 @@ export function NewInvoiceDialog({
       router.refresh();
       setOpen(false);
       setItems([{ ...EMPTY_ITEM }]);
+      setDiscount("0");
       setTax("0");
       setNumber("");
       setParseMessage(null);
@@ -254,6 +262,17 @@ export function NewInvoiceDialog({
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
+              <Label htmlFor="invoice-discount">הנחה</Label>
+              <Input
+                id="invoice-discount"
+                name="discount"
+                type="number"
+                step="0.01"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="invoice-tax">מע&quot;מ</Label>
               <Input
                 id="invoice-tax"
@@ -264,23 +283,24 @@ export function NewInvoiceDialog({
                 onChange={(e) => setTax(e.target.value)}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="invoice-pdf" className="flex items-center gap-1.5">
-                <FileScan className="size-3.5" />
-                קובץ חשבונית (PDF, לא חובה)
-              </Label>
-              <input
-                id="invoice-pdf"
-                name="pdf"
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-muted-foreground file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-border/60"
-              />
-              <p className="text-xs text-muted-foreground">
-                העלאת קובץ תנסה לזהות אוטומטית שורות, כמויות, מחירים ומספר חשבונית מתוך המסמך.
-              </p>
-            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="invoice-pdf" className="flex items-center gap-1.5">
+              <FileScan className="size-3.5" />
+              קובץ חשבונית (PDF, לא חובה)
+            </Label>
+            <input
+              id="invoice-pdf"
+              name="pdf"
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-muted-foreground file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-border/60"
+            />
+            <p className="text-xs text-muted-foreground">
+              העלאת קובץ תנסה לזהות אוטומטית שורות, כמויות, מחירים, הנחה ומספר חשבונית מתוך המסמך.
+            </p>
           </div>
 
           {parseMessage && (

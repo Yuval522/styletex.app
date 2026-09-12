@@ -41,6 +41,7 @@ export default async function ProjectDetailPage({
             version: true,
             status: true,
             subtotal: true,
+            discount: true,
             tax: true,
             total: true,
             createdAt: true,
@@ -200,6 +201,9 @@ export default async function ProjectDetailPage({
                     </div>
                     <div className="mt-3 flex justify-end gap-6 text-sm text-muted-foreground">
                       <span>סכום ביניים {formatCurrency(Number(quote.subtotal))}</span>
+                      {Number(quote.discount) > 0 && (
+                        <span>הנחה {formatCurrency(Number(quote.discount))}</span>
+                      )}
                       <span>מע&quot;מ {formatCurrency(Number(quote.tax))}</span>
                       <span className="font-medium text-foreground">
                         סה&quot;כ {formatCurrency(Number(quote.total))}
