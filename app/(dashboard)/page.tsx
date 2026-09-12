@@ -83,12 +83,19 @@ export default async function OverviewPage() {
     .filter((q) => q.paid)
     .reduce((sum, q) => sum + Number(q.total), 0);
 
-  // Unique clients behind the active workload — distinct from the count of
-  // active projects itself, since one client can now have several
-  // concurrent projects (e.g. two jobs at the same site). Using the total
-  // ever-created client count here made this number static and unrelated to
-  // current activity; this instead moves with the real active pipeline.
-  const activeClientIds = new Set(activeProjects.map((p) => p.clientId));
+  // Unique clients/locations behind the active workload — distinct from the
+  // count of active projects itself, since one client can now have several
+  // concurrent projects (e.g. two jobs at the same site). Keyed by
+  // normalized (trimmed, case-insensitive) client NAME rather than clientId,
+  // so this matches the same-location grouping on /projects: two separate
+  // Client rows that happen to share a name (e.g. a second job at an
+  // existing site entered as a new client before the duplicate-name warning
+  // existed) count once here, not twice. Using the total ever-created
+  // client count here made this number static and unrelated to current
+  // activity; this instead moves with the real active pipeline.
+  const activeClientNames = new Set(
+    activeProjects.map((p) => p.client.name.trim().toLowerCase())
+  );
 
   // "בייצור" — active projects genuinely in production: either their own
   // lifecycle status says so, or they have an open (non-READY) work order.
@@ -129,8 +136,8 @@ export default async function OverviewPage() {
         <StatCard label="פרויקטים פעילים" value={String(activeProjects.length)} />
         <StatCard
           label="לקוחות פעילים"
-          value={String(activeClientIds.size)}
-          hint={`${totalClients} סה"כ במערכת`}
+          value={String(activeClientNames.size)}
+          hint={`${totalClients} רשומות לקוח במערכת`}
         />
         <StatCard label="שווי צבר עבודות" value={formatCurrency(pipelineValue)} />
         <StatCard label="בייצור" value={String(inProductionProjectIds.size)} />

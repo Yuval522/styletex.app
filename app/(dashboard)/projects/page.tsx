@@ -37,24 +37,38 @@ export default async function ProjectsPage() {
     prisma.client.findMany({ orderBy: { name: "asc" } }),
   ]);
 
-  // Group by client so multiple distinct projects belonging to the same
-  // client/location (e.g. two separate jobs under "מרכז אנרגיה") show
-  // together under one heading instead of being scattered through a flat,
-  // updatedAt-ordered list. The data model has always allowed any number of
-  // projects per client (Client.projects is one-to-many, no unique
-  // constraint) — this only changes how the existing data is displayed.
-  // Each group surfaces at the position of its most-recently-updated
-  // project, since `projects` above is already ordered by updatedAt desc
-  // and groups are built by first-seen order.
-  const groupedProjects: { client: (typeof projects)[number]["client"]; projects: typeof projects }[] = [];
-  const groupIndexByClientId = new Map<string, number>();
+  // Group by NORMALIZED client name (trimmed, case-insensitive) rather than
+  // raw clientId, so multiple distinct projects at the same client/location
+  // (e.g. two separate jobs under "מרכז אנרגיה") always show together under
+  // one heading — even when they were entered as two separate Client rows
+  // that happen to share a name (e.g. a second job created via "לקוח חדש"
+  // before the duplicate-name warning on that dialog existed, or a second
+  // person on the team typing the same site name independently). Grouping
+  // strictly by clientId is technically correct per the schema (Client has
+  // always allowed many projects, no unique constraint) but silently splits
+  // apart exactly the case this page exists to show grouped, whenever the
+  // same location ended up as two Client records. Each group surfaces at
+  // the position of its most-recently-updated project, since `projects`
+  // above is already ordered by updatedAt desc and groups are built by
+  // first-seen order.
+  const groupedProjects: {
+    groupKey: string;
+    clientName: string;
+    projects: typeof projects;
+  }[] = [];
+  const groupIndexByName = new Map<string, number>();
   for (const project of projects) {
-    const existingIndex = groupIndexByClientId.get(project.clientId);
+    const normalizedName = project.client.name.trim().toLowerCase();
+    const existingIndex = groupIndexByName.get(normalizedName);
     if (existingIndex !== undefined) {
       groupedProjects[existingIndex].projects.push(project);
     } else {
-      groupIndexByClientId.set(project.clientId, groupedProjects.length);
-      groupedProjects.push({ client: project.client, projects: [project] });
+      groupIndexByName.set(normalizedName, groupedProjects.length);
+      groupedProjects.push({
+        groupKey: normalizedName,
+        clientName: project.client.name,
+        projects: [project],
+      });
     }
   }
 
@@ -111,11 +125,11 @@ export default async function ProjectsPage() {
         </p>
       ) : (
         <div className="space-y-8">
-          {groupedProjects.map(({ client, projects: clientProjects }) => (
-            <div key={client.id}>
+          {groupedProjects.map(({ groupKey, clientName, projects: clientProjects }) => (
+            <div key={groupKey}>
               {clientProjects.length > 1 && (
                 <ClientParallelTimeline
-                  clientName={client.name}
+                  clientName={clientName}
                   projects={clientProjects.map((project) => ({
                     id: project.id,
                     name: project.name,
