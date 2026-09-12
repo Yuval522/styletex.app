@@ -6,7 +6,8 @@ import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
 import { ProjectStatusSelect } from "@/components/projects/status-select";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProjectStepper } from "@/components/projects/project-stepper";
-import { getProjectStages } from "@/components/projects/project-stages";
+import { getProjectStages, type Stage } from "@/components/projects/project-stages";
+import { ClientParallelTimeline } from "@/components/projects/client-parallel-timeline";
 import { DeleteButton } from "@/components/shared/delete-button";
 import { deleteProject } from "@/actions/projects";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -57,6 +58,41 @@ export default async function ProjectsPage() {
     }
   }
 
+  // Computed once per project up front so the same Stage[] can back both
+  // that project's own card timeline and, for clients with more than one
+  // project, the "parallel timeline" comparison dialog — without deriving
+  // the lifecycle stages for a project twice.
+  const stagesByProjectId = new Map<string, Stage[]>();
+  for (const project of projects) {
+    const latestQuote = project.quotes[0]
+      ? {
+          id: project.quotes[0].id,
+          status: project.quotes[0].status,
+          paid: project.quotes[0].paid,
+          paidAt: project.quotes[0].paidAt,
+          total: Number(project.quotes[0].total),
+        }
+      : null;
+
+    stagesByProjectId.set(
+      project.id,
+      getProjectStages({
+        client: {
+          name: project.client.name,
+          email: project.client.email,
+          phone: project.client.phone,
+        },
+        latestQuote,
+        projectStatus: project.status,
+        startDate: project.startDate,
+        overrides:
+          project.checkpointOverrides && typeof project.checkpointOverrides === "object"
+            ? (project.checkpointOverrides as Record<string, boolean>)
+            : {},
+      })
+    );
+  }
+
   return (
     <div>
       <PageHeader
@@ -78,40 +114,21 @@ export default async function ProjectsPage() {
           {groupedProjects.map(({ client, projects: clientProjects }) => (
             <div key={client.id}>
               {clientProjects.length > 1 && (
-                <div className="mb-3 flex items-center gap-2">
-                  <h2 className="font-display text-base text-foreground">{client.name}</h2>
-                  <span className="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">
-                    {clientProjects.length} פרויקטים באותו לקוח
-                  </span>
-                </div>
+                <ClientParallelTimeline
+                  clientName={client.name}
+                  projects={clientProjects.map((project) => ({
+                    id: project.id,
+                    name: project.name,
+                    status: project.status,
+                    budget: project.budget ? Number(project.budget) : null,
+                    targetDate: project.targetDate,
+                    stages: stagesByProjectId.get(project.id)!,
+                  }))}
+                />
               )}
               <div className="space-y-5">
                 {clientProjects.map((project) => {
-                  const latestQuote = project.quotes[0]
-                    ? {
-                        id: project.quotes[0].id,
-                        status: project.quotes[0].status,
-                        paid: project.quotes[0].paid,
-                        paidAt: project.quotes[0].paidAt,
-                        total: Number(project.quotes[0].total),
-                      }
-                    : null;
-
-                  const stages = getProjectStages({
-                    client: {
-                      name: project.client.name,
-                      email: project.client.email,
-                      phone: project.client.phone,
-                    },
-                    latestQuote,
-                    projectStatus: project.status,
-                    startDate: project.startDate,
-                    overrides:
-                      project.checkpointOverrides &&
-                      typeof project.checkpointOverrides === "object"
-                        ? (project.checkpointOverrides as Record<string, boolean>)
-                        : {},
-                  });
+                  const stages = stagesByProjectId.get(project.id)!;
 
                   return (
                     <Card key={project.id}>

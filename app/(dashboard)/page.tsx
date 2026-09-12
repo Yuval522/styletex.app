@@ -39,9 +39,17 @@ function buildMonthlyBuckets(
 }
 
 export default async function OverviewPage() {
-  const [projects, clients, approvedQuotes, openWorkOrders] = await Promise.all([
+  const [projects, totalClients, approvedQuotes, openWorkOrders] = await Promise.all([
     prisma.project.findMany({
-      include: { client: true },
+      include: {
+        client: true,
+        // Latest quote per project drives the real backlog value below —
+        // Project.budget is an optional, manually-typed estimate that in
+        // practice is rarely kept up to date once a real quote exists, so
+        // relying on it alone made "שווי צבר עבודות" read ₪0 even for
+        // projects with real, accurately-parsed quote totals on file.
+        quotes: { orderBy: { version: "desc" }, take: 1, select: { total: true } },
+      },
       orderBy: { createdAt: "desc" },
     }),
     prisma.client.count(),
@@ -49,23 +57,53 @@ export default async function OverviewPage() {
       where: { status: "APPROVED" },
       select: { total: true, paid: true },
     }),
+    // projectId (not just stage) is needed so "בייצור" below can tell which
+    // active projects already have an open work order, instead of only
+    // being able to count work orders in the aggregate.
     prisma.workOrder.findMany({
       where: { stage: { not: "READY" } },
-      select: { stage: true },
+      select: { stage: true, projectId: true },
     }),
   ]);
 
   const activeProjects = projects.filter(
     (p) => !["COMPLETE", "CANCELLED"].includes(p.status)
   );
-  const pipelineValue = activeProjects.reduce(
-    (sum, p) => sum + Number(p.budget ?? 0),
-    0
-  );
+
+  // Real backlog value: the latest quote's total (what the document actually
+  // says is owed, after discount + VAT) when one exists, falling back to the
+  // manual budget estimate only for projects that don't have a quote yet.
+  const pipelineValue = activeProjects.reduce((sum, p) => {
+    const latestQuoteTotal = p.quotes[0] ? Number(p.quotes[0].total) : null;
+    return sum + (latestQuoteTotal ?? Number(p.budget ?? 0));
+  }, 0);
+
   const approvedValue = approvedQuotes.reduce((sum, q) => sum + Number(q.total), 0);
   const paidValue = approvedQuotes
     .filter((q) => q.paid)
     .reduce((sum, q) => sum + Number(q.total), 0);
+
+  // Unique clients behind the active workload — distinct from the count of
+  // active projects itself, since one client can now have several
+  // concurrent projects (e.g. two jobs at the same site). Using the total
+  // ever-created client count here made this number static and unrelated to
+  // current activity; this instead moves with the real active pipeline.
+  const activeClientIds = new Set(activeProjects.map((p) => p.clientId));
+
+  // "בייצור" — active projects genuinely in production: either their own
+  // lifecycle status says so, or they have an open (non-READY) work order.
+  // Counting only WorkOrder rows left this stuck at 0 whenever a project's
+  // status was moved to "ייצור" without a separate work order ever being
+  // created for it, which is the common path for smaller jobs.
+  const inProductionProjectIds = new Set<string>();
+  for (const p of activeProjects) {
+    if (p.status === "PRODUCTION" || p.status === "INSTALLATION") {
+      inProductionProjectIds.add(p.id);
+    }
+  }
+  for (const wo of openWorkOrders) {
+    inProductionProjectIds.add(wo.projectId);
+  }
 
   const statusCounts = activeProjects.reduce<Record<string, number>>((acc, p) => {
     acc[p.status as ProjectStatus] = (acc[p.status as ProjectStatus] ?? 0) + 1;
@@ -89,9 +127,13 @@ export default async function OverviewPage() {
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="פרויקטים פעילים" value={String(activeProjects.length)} />
-        <StatCard label="לקוחות" value={String(clients)} />
+        <StatCard
+          label="לקוחות פעילים"
+          value={String(activeClientIds.size)}
+          hint={`${totalClients} סה"כ במערכת`}
+        />
         <StatCard label="שווי צבר עבודות" value={formatCurrency(pipelineValue)} />
-        <StatCard label="בייצור" value={String(openWorkOrders.length)} />
+        <StatCard label="בייצור" value={String(inProductionProjectIds.size)} />
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -183,7 +225,7 @@ export default async function OverviewPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <Card>
       <CardContent className="p-5">
@@ -191,6 +233,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
           {label}
         </p>
         <p className="mt-2 font-display text-3xl text-foreground">{value}</p>
+        {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       </CardContent>
     </Card>
   );
