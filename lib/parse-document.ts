@@ -8,9 +8,9 @@
  * clearly instead of guessing. Everything this returns is meant to pre-fill
  * an editable form for a human to review, never to be trusted blindly.
  *
- * Tuned against three real Styletex documents (two quotes and a tax
+ * Tuned against four real Styletex documents (three quotes and a tax
  * invoice, all produced by the same accounting software template). PDF.js's
- * text extraction for these specific documents has three quirks worth
+ * text extraction for these specific documents has four quirks worth
  * calling out because they shape almost everything below:
  *
  * 1. Every line-item row extracts as
@@ -20,6 +20,19 @@
  *    total. Which of the two trailing amounts is the unit price and which
  *    is the total isn't consistently ordered, so both orderings are tried
  *    and validated against qty × unitPrice ≈ total.
+ * 1a. A decimal spec value quoted inside the description (e.g. "לפי מפרט
+ *    2.70") sometimes gets glued, with no space at all, directly onto the
+ *    row's real price — extracting as "...מפרט 2.705,670.00 2,100.00 30".
+ *    A naive money regex reads right through the join and grabs "705,670"
+ *    as if it were one number, corrupting the price so badly the qty ×
+ *    unitPrice ≈ total check fails and the *entire row* silently drops —
+ *    which is worse than it sounds, because the row is then still "open"
+ *    waiting to resolve, so it goes on to swallow the *next* real row's
+ *    text as if it were just more of its own wrapped description (see 1b).
+ *    MONEY is written to refuse to start a match immediately after a
+ *    "." or "."+one-digit (i.e. inside someone else's 2-decimal fraction),
+ *    which is exactly what forces it to skip past the contaminating digits
+ *    and lock onto the real, separate price figure instead.
  * 1b. When a row's description is long, PDF.js wraps it across multiple
  *    extracted lines and only the *last* of those lines carries the
  *    "<unitPrice> <total> <index>" tail — e.g. a real row can extract as
@@ -77,7 +90,16 @@ export type ParsedFinancialDocument = {
 // X,XXX.XX. That's what lets a real currency figure be told apart from the
 // bare row/item-index integers this generator glues onto every line-item
 // row, and from a VAT *rate* like the "18.00" in "מע"מ18.00%".
-const MONEY = /-?\d{1,3}(?:,\d{3})*\.\d{2}/;
+//
+// The two lookbehinds refuse to let a match start immediately after a "."
+// or after "."+one-digit — i.e. from inside another number's 2-decimal
+// fraction. Without this, a spec value glued with zero space onto the
+// row's real price (e.g. "...מפרט 2.705,670.00...", see quirk 1a above)
+// gets its trailing digits stolen into a bogus, corrupted figure. A
+// position exactly two digits after the dot (the normal end of any
+// complete money value) is deliberately left unblocked — that's the
+// legitimate boundary where the next real number is supposed to start.
+const MONEY = /(?<!\.)(?<!\.\d)-?\d{1,3}(?:,\d{3})*\.\d{2}/;
 const MONEY_G = new RegExp(MONEY.source, "g");
 const ORPHAN_VALUE_LINE = new RegExp(`^${MONEY.source}$`);
 const LEADING_QTY = /^(\d{1,3}(?:,\d{3})*\.\d{2})\s+(.+)$/;
