@@ -11,49 +11,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { registerAccount } from "@/actions/auth";
+import { resetPassword } from "@/actions/auth";
 
 const AUTHORIZED_EMAILS = [
   { label: "Yuval — yuvalro123@gmail.com", value: "yuvalro123@gmail.com" },
   { label: "Itamar — itamarknaan@gmail.com", value: "itamarknaan@gmail.com" },
 ];
 
-// A generic-enough substring match on the "already exists" error returned
-// by registerAccount() to offer the reset-password tab instead, without
-// needing a separate structured error code for one specific message.
-const ALREADY_EXISTS_MARKER = "כבר קיים חשבון";
-
-export function SignupForm({ onSwitchToReset }: { onSwitchToReset?: () => void }) {
+export function ResetPasswordForm() {
   const [email, setEmail] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(formData: FormData) {
     if (!email) {
-      setError("יש לבחור עבור מי נרשמים.");
+      setError("יש לבחור עבור מי מאפסים את הסיסמה.");
       return;
     }
     formData.set("email", email);
     setError(null);
     startTransition(async () => {
-      const result = await registerAccount(formData);
+      const result = await resetPassword(formData);
       if (result?.error) {
         setError(result.error);
       }
     });
   }
 
-  const alreadyExists = error?.includes(ALREADY_EXISTS_MARKER) ?? false;
-
   return (
     <form action={handleSubmit} className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        ההרשמה זמינה רק לצוות Styletex Kitchens. בחרו את שמכם וקבעו סיסמה —
-        לאחר ההרשמה תתחברו אוטומטית.
+        קביעת סיסמה חדשה לחשבון קיים. הפעולה משפיעה רק על הסיסמה שלכם —
+        הלקוחות, הפרויקטים, המסמכים והנתונים האחרים במערכת אינם נגועים כלל.
       </p>
 
       <div className="space-y-1.5">
-        <Label>עבור מי נרשמים</Label>
+        <Label>עבור מי מאפסים סיסמה</Label>
         <Select value={email} onValueChange={setEmail}>
           <SelectTrigger>
             <SelectValue placeholder="בחרו שם" />
@@ -69,9 +62,9 @@ export function SignupForm({ onSwitchToReset }: { onSwitchToReset?: () => void }
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="signup-password">סיסמה</Label>
+        <Label htmlFor="reset-password">סיסמה חדשה</Label>
         <Input
-          id="signup-password"
+          id="reset-password"
           name="password"
           type="password"
           autoComplete="new-password"
@@ -83,9 +76,9 @@ export function SignupForm({ onSwitchToReset }: { onSwitchToReset?: () => void }
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="signup-password-confirm">אימות סיסמה</Label>
+        <Label htmlFor="reset-password-confirm">אימות סיסמה חדשה</Label>
         <Input
-          id="signup-password-confirm"
+          id="reset-password-confirm"
           name="confirmPassword"
           type="password"
           autoComplete="new-password"
@@ -97,22 +90,13 @@ export function SignupForm({ onSwitchToReset }: { onSwitchToReset?: () => void }
       </div>
 
       {error && (
-        <div className="space-y-2 rounded-md bg-status-cancelled/10 px-3 py-2 text-sm text-status-cancelled">
-          <p>{error}</p>
-          {alreadyExists && onSwitchToReset && (
-            <button
-              type="button"
-              onClick={onSwitchToReset}
-              className="block font-medium underline underline-offset-2 hover:no-underline"
-            >
-              שכחתי סיסמה — מעבר לאיפוס סיסמה
-            </button>
-          )}
-        </div>
+        <p className="rounded-md bg-status-cancelled/10 px-3 py-2 text-sm text-status-cancelled">
+          {error}
+        </p>
       )}
 
       <Button type="submit" variant="accent" className="w-full" disabled={isPending}>
-        {isPending ? "נרשם…" : "הרשמה"}
+        {isPending ? "מאפס…" : "איפוס סיסמה והתחברות"}
       </Button>
     </form>
   );

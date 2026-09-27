@@ -135,3 +135,62 @@ export async function registerAccount(
     throw error;
   }
 }
+
+/**
+ * Password reset for an EXISTING account (passwordSet: true already) — the
+ * one case registerAccount() deliberately refuses, by design, so nobody can
+ * accidentally clobber a real password by mis-clicking Sign Up. This is the
+ * intentional, safe way back in if you forgot your password: it only ever
+ * overwrites the passwordHash column on your own row (found by your team
+ * email, same allow-list as sign-up — see lib/team-accounts.ts). It never
+ * deletes or recreates the row, and the User table has no relation to any
+ * client, project, quote, invoice, material, or calendar record in the
+ * schema (see prisma/schema.prisma) — there is nothing else for this to
+ * touch, no matter how many times it's run.
+ */
+export async function resetPassword(
+  formData: FormData
+): Promise<{ error: string } | undefined> {
+  const emailRaw = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirmPassword") ?? "");
+
+  if (!emailRaw || !password) {
+    return { error: "יש להזין אימייל וסיסמה." };
+  }
+
+  const account = findTeamAccount(emailRaw);
+  if (!account) {
+    return {
+      error: "אימייל זה אינו מורשה לאפס סיסמה. הגישה מוגבלת לצוות Styletex Kitchens בלבד.",
+    };
+  }
+
+  if (password.length < 8) {
+    return { error: "הסיסמה חייבת להכיל לפחות 8 תווים." };
+  }
+  if (password !== confirm) {
+    return { error: "אימות הסיסמה אינו תואם." };
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.user.upsert({
+    where: { email: account.email },
+    update: { passwordHash, passwordSet: true },
+    create: { name: account.name, email: account.email, passwordHash, passwordSet: true },
+  });
+
+  try {
+    await signIn("credentials", {
+      email: account.email,
+      password,
+      redirectTo: "/",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      // The password was reset successfully; only the auto-login hiccuped.
+      return { error: "הסיסמה אופסה בהצלחה. יש להתחבר עם הסיסמה החדשה." };
+    }
+    throw error;
+  }
+}

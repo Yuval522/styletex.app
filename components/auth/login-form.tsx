@@ -6,7 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { login } from "@/actions/auth";
 
-export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void }) {
+export function LoginForm({
+  onSwitchToSignup,
+  onSwitchToReset,
+}: {
+  onSwitchToSignup?: () => void;
+  onSwitchToReset?: () => void;
+}) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [needsSignup, setNeedsSignup] = useState(false);
@@ -59,9 +65,18 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
             <button
               type="button"
               onClick={onSwitchToSignup}
-              className="font-medium underline underline-offset-2 hover:no-underline"
+              className="block font-medium underline underline-offset-2 hover:no-underline"
             >
               מעבר ללשונית ״הרשמה״
+            </button>
+          )}
+          {!needsSignup && onSwitchToReset && (
+            <button
+              type="button"
+              onClick={onSwitchToReset}
+              className="block font-medium underline underline-offset-2 hover:no-underline"
+            >
+              שכחתי סיסמה — איפוס סיסמה
             </button>
           )}
         </div>
