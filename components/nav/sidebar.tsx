@@ -40,7 +40,7 @@ export function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background font-display text-sm">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground font-display text-sm">
           S
         </div>
         <div className="leading-tight">
@@ -64,7 +64,7 @@ export function SidebarContent({
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors sm:py-2",
                 active
-                  ? "bg-surface-muted text-foreground"
+                  ? "bg-accent-soft text-accent"
                   : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
               )}
             >

@@ -23,7 +23,7 @@ export default async function LoginPage({
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex size-11 items-center justify-center rounded-md bg-foreground text-background font-display text-lg">
+          <div className="flex size-11 items-center justify-center rounded-md bg-accent text-accent-foreground font-display text-lg">
             S
           </div>
           <div>

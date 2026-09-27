@@ -14,7 +14,7 @@ export function MobileNav({ user }: { user?: MobileNavUser }) {
     <>
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface px-4 lg:hidden">
         <div className="flex items-center gap-2">
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-foreground text-background font-display text-xs">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground font-display text-xs">
             S
           </div>
           <p className="font-brand text-sm text-foreground">Styletex</p>

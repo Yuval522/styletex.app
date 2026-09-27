@@ -1,29 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  /* Warm neutral base */
-  --background: #FAF8F5;
-  --surface: #FFFFFF;
-  --surface-muted: #F1EEE8;
-  --foreground: #1C1B1A;
-  --muted: #8A8579;
-  --muted-foreground: #6B665C;
-  --border: #E4DFD5;
+  /* Brand refresh: matte charcoal base + terracotta accent, replacing the
+     old warm-neutral/light theme and brass accent. Surfaces step up in
+     lightness from --background (page) -> --surface-muted (subtle fills,
+     table stripes, chart tracks) -> --surface (cards, sidebar, dialogs) so
+     cards still read as "lifted" the way they did against the old light
+     background, just inverted. */
+  --background: #1B1917;
+  --surface: #221F1C;
+  --surface-muted: #2A2620;
+  --foreground: #F3EFE9;
+  --muted: #7A756A;
+  --muted-foreground: #A89F92;
+  --border: #3A352F;
 
-  /* Accent: warm brass/walnut */
-  --accent: #A9793F;
-  --accent-foreground: #FFFFFF;
-  --accent-soft: #F1E4D2;
+  /* Accent: warm terracotta/coral, matching the app icon */
+  --accent: #DD8259;
+  /* White text on #DD8259 fails WCAG contrast (~2.8:1) — the charcoal
+     background color reads clearly on it instead (~6:1) and ties accent
+     surfaces back into the base palette. */
+  --accent-foreground: #1B1917;
+  --accent-soft: #3A2A22;
 
-  /* Status colors (muted, not saturated) */
+  /* Status colors (muted, not saturated). Re-checked against the new
+     charcoal --background at their actual usage size (text-xs badge
+     labels, ~12px, used both as text-on-tinted-badge and, for cancelled,
+     as white-on-solid on the destructive button) — most of the original
+     set already cleared 4.5:1 once the page went dark, since they were
+     already mid-value tones rather than true darks. Three were lightened
+     just enough to clear 4.5:1 (were 3.5–3.8:1): complete, installation,
+     and cancelled — same hue family as before, just a notch brighter. */
   --status-lead: #8A8579;
   --status-design: #6E85A0;
   --status-quoted: #B08D57;
   --status-approved: #6B8F71;
   --status-production: #A9793F;
-  --status-installation: #7A6BA0;
-  --status-complete: #4C7A5A;
-  --status-cancelled: #B15C4D;
+  --status-installation: #8C7DB0;
+  --status-complete: #5C9C74;
+  --status-cancelled: #C96E5C;
 
   --radius: 0.625rem;
 }
