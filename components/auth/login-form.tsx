@@ -6,16 +6,19 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { login } from "@/actions/auth";
 
-export function LoginForm() {
+export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [needsSignup, setNeedsSignup] = useState(false);
 
   function handleSubmit(formData: FormData) {
     setError(null);
+    setNeedsSignup(false);
     startTransition(async () => {
       const result = await login(formData);
       if (result?.error) {
         setError(result.error);
+        setNeedsSignup(Boolean(result.needsSignup));
       }
     });
   }
@@ -50,9 +53,18 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <p className="rounded-md bg-status-cancelled/10 px-3 py-2 text-sm text-status-cancelled">
-          {error}
-        </p>
+        <div className="space-y-2 rounded-md bg-status-cancelled/10 px-3 py-2 text-sm text-status-cancelled">
+          <p>{error}</p>
+          {needsSignup && onSwitchToSignup && (
+            <button
+              type="button"
+              onClick={onSwitchToSignup}
+              className="font-medium underline underline-offset-2 hover:no-underline"
+            >
+              מעבר ללשונית ״הרשמה״
+            </button>
+          )}
+        </div>
       )}
 
       <Button type="submit" variant="accent" className="w-full" disabled={isPending}>

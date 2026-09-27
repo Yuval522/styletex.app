@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { LogoMark } from "@/components/brand/logo-mark";
 
 export const NAV_ITEMS = [
   { href: "/", label: "סקירה כללית", icon: LayoutDashboard },
@@ -40,8 +41,8 @@ export function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground font-display text-sm">
-          S
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+          <LogoMark className="size-4.5" />
         </div>
         <div className="leading-tight">
           <p className="font-brand text-base text-foreground">Styletex</p>

@@ -18,6 +18,14 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Styletex Kitchens",
   description: "ניהול פרויקטים למטבחים וארונות בהתאמה אישית",
+  // Makes "Add to Home Screen" on iOS open as a standalone app (no Safari
+  // chrome) with the right title under the icon, instead of a generic
+  // screenshot-based bookmark icon and the page's <title> as the label.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Styletex",
+  },
 };
 
 // Explicit rather than relying on Next's default: this app is used from
@@ -27,6 +35,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: "#1B1917",
 };
 
 export default function RootLayout({

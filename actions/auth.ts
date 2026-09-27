@@ -8,12 +8,33 @@ import { findTeamAccount } from "@/lib/team-accounts";
 
 export async function login(
   formData: FormData
-): Promise<{ error: string } | undefined> {
-  const email = String(formData.get("email") ?? "").trim();
+): Promise<{ error: string; needsSignup?: boolean } | undefined> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
     return { error: "יש להזין אימייל וסיסמה." };
+  }
+
+  // The build's automatic seed step (prisma/seed.ts) creates a placeholder
+  // row for Yuval/Itamar's email with a random password nobody knows
+  // (passwordSet: false) — the real password is only set once, via the
+  // "הרשמה" (Sign Up) tab. To the Credentials provider, "no account yet"
+  // and "account exists but no real password set" both look exactly like
+  // an invalid password, which produced a misleading "אימייל או סיסמה
+  // שגויים" for anyone who hadn't signed up yet. Checked here explicitly
+  // so those two cases get a message that actually says what to do next,
+  // instead of implying the password itself was wrong.
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (!existing || !existing.passwordSet) {
+    if (findTeamAccount(email)) {
+      return {
+        error:
+          "טרם הוגדרה סיסמה לחשבון זה. עברו ללשונית \"הרשמה\", בחרו את שמכם, וקבעו סיסמה — בפעם הראשונה בלבד.",
+        needsSignup: true,
+      };
+    }
+    return { error: "אימייל או סיסמה שגויים." };
   }
 
   try {

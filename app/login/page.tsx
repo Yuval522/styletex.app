@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AuthTabs } from "@/components/auth/auth-tabs";
+import { LogoMark } from "@/components/brand/logo-mark";
 
 export const metadata = {
   title: "התחברות · Styletex Kitchens",
@@ -23,8 +24,8 @@ export default async function LoginPage({
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex size-11 items-center justify-center rounded-md bg-accent text-accent-foreground font-display text-lg">
-            S
+          <div className="flex size-11 items-center justify-center rounded-md bg-accent text-accent-foreground">
+            <LogoMark className="size-6" />
           </div>
           <div>
             <p className="font-brand text-xl text-foreground">Styletex</p>
