@@ -42,7 +42,7 @@ export function SidebarContent({
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-6 py-6">
         <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
-          <LogoMark className="size-4.5" />
+          <LogoMark className="size-6" />
         </div>
         <div className="leading-tight">
           <p className="font-brand text-base text-foreground">Styletex</p>
